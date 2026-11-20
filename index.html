@@ -330,6 +330,16 @@
         color: var(--accent-dark);
       }
 
+      .calculation-status {
+        margin: -4px 0 15px;
+        color: #64777b;
+        font-size: 11px;
+      }
+
+      .calculation-status.error {
+        color: #a43535;
+      }
+
       .hint {
         display: flex;
         align-items: flex-start;
@@ -852,12 +862,12 @@
             <p>Slab quantities and truck scheduling</p>
           </div>
         </div>
-        <div class="stage-badge"><span class="stage-dot"></span>Stage 2 · Map and geometry</div>
+        <div class="stage-badge"><span class="stage-dot"></span>Stage 3 · Core calculations</div>
       </header>
 
       <p class="prototype-note">
-        Map drawing and typed dimensions are interactive. Calculated results
-        remain illustrative placeholders, and the Copy button is not connected.
+        Slab geometry and summary calculations update with valid inputs. The
+        truck timeline and order summary remain static Stage 4 previews.
       </p>
 
       <main class="workspace">
@@ -882,13 +892,13 @@
               </div>
               <div class="map-frame">
                 <div id="map" role="application" aria-label="Satellite map centered on BYU campus"></div>
-                <div class="map-output-label">Static sample result · 2,400 ft<sup>2</sup> · 47.0 cy to order</div>
+                  <div id="map-output-label" class="map-output-label">Area 2,400 ft<sup>2</sup> · order 47.0 cy</div>
               </div>
               <p id="map-status" class="map-note" role="status" aria-live="polite">
                 Click Draw slab, add at least three corners, then double-click or click the first corner to finish.
               </p>
               <p class="map-note">
-                Static result preview: 2,400 ft<sup>2</sup> and 47.0 cy to order. Results do not change in Stage 2.
+                The map label shows the slab area and waste-adjusted order volume.
               </p>
               <div class="hint">
                 <span class="hint-mark" aria-hidden="true">i</span>
@@ -903,7 +913,7 @@
                 <div>
                   <span class="eyebrow">Pour setup</span>
                   <h2 id="inputs-title">Inputs</h2>
-                  <p>Values shown are sample settings for this mockup.</p>
+                  <p>Inputs use the specified units, limits, and defaults.</p>
                 </div>
                 <span class="quiet-pill">Example values</span>
               </div>
@@ -1016,36 +1026,39 @@
                 <div>
                   <span class="eyebrow">Pour overview</span>
                   <h2 id="summary-title">Order summary</h2>
-                  <p>Illustrative results for the example slab</p>
+                  <p>Results for the current slab and input values</p>
                 </div>
-                <span class="quiet-pill">Preview</span>
+                <span class="quiet-pill">Live calculations</span>
               </div>
+              <p id="calculation-status" class="calculation-status" role="status" aria-live="polite">
+                Calculations are ready. The timeline and order summary remain static previews.
+              </p>
 
               <div class="summary-grid">
                 <article class="metric-card">
                   <div class="metric-label"><span class="metric-icon">CY</span>Concrete to order</div>
-                  <strong class="metric-value">47.0 <small>cy</small></strong>
-                  <span class="metric-sub">Includes 5% waste</span>
+                  <strong class="metric-value"><span id="summary-volume-value">47.0</span> <small>cy</small></strong>
+                  <span id="summary-volume-note" class="metric-sub">Includes 5% waste</span>
                 </article>
                 <article class="metric-card">
                   <div class="metric-label"><span class="metric-icon">#</span>Truckloads</div>
-                  <strong class="metric-value">5</strong>
-                  <span class="metric-sub">Last load: 7 cy</span>
+                  <strong id="summary-loads-value" class="metric-value">5</strong>
+                  <span id="summary-loads-note" class="metric-sub">Last load: 7 cy</span>
                 </article>
                 <article class="metric-card">
                   <div class="metric-label"><span class="metric-icon">T</span>Trucks in rotation</div>
-                  <strong class="metric-value">4</strong>
+                  <strong id="summary-trucks-value" class="metric-value">4</strong>
                   <span class="metric-sub">To keep the pour moving</span>
                 </article>
                 <article class="metric-card">
                   <div class="metric-label"><span class="metric-icon">D</span>Pour duration</div>
-                  <strong class="metric-value">1h 34m</strong>
+                  <strong id="summary-duration-value" class="metric-value">1 h 34 min</strong>
                   <span class="metric-sub">First arrival to finish</span>
                 </article>
                 <article class="metric-card finish">
                   <div class="metric-label"><span class="metric-icon">F</span>Finish time</div>
-                  <strong class="metric-value">8:34 <small>AM</small></strong>
-                  <span class="metric-sub">First truck at 7:00 AM</span>
+                  <strong id="summary-finish-value" class="metric-value">8:34 AM</strong>
+                  <span id="summary-finish-note" class="metric-sub">First truck at 7:00 AM</span>
                 </article>
               </div>
             </div>
@@ -1057,7 +1070,7 @@
                 <div>
                   <span class="eyebrow">Delivery plan</span>
                   <h2 id="timeline-title">Truck timeline</h2>
-                  <p>One row per load · arrivals every 20 minutes</p>
+                  <p>Static Stage 4 example · arrivals every 20 minutes</p>
                 </div>
                 <span class="quiet-pill">Local time</span>
               </div>
@@ -1133,7 +1146,7 @@
                 <div>
                   <span class="eyebrow">Ready to call in</span>
                   <h2 id="order-title">Order summary</h2>
-                  <p>Plain-text order for the batch plant</p>
+                  <p>Static Stage 4 preview · not connected to current inputs</p>
                 </div>
               </div>
               <div class="order-box">
@@ -1148,10 +1161,161 @@
           </section>
         </div>
       </main>
-      <p class="footer-note">Stage 2 · Map and slab geometry · Calculated results remain placeholders</p>
+      <p class="footer-note">Stage 3 · Calculated summary values · Timeline and order summary remain static previews</p>
     </div>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
       integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script>
+      const ConcreteCalculations = (() => {
+        const earthRadiusMeters = 6378137;
+        const squareMetersToSquareFeet = 10.7639;
+
+        function requireRange(name, value, minimum, maximum) {
+          if (!Number.isFinite(value) || value < minimum || value > maximum) {
+            throw new RangeError(name + " must be between " + minimum + " and " + maximum + ".");
+          }
+          return value;
+        }
+
+        function calculateRectangleArea(lengthFeet, widthFeet) {
+          requireRange("Length", lengthFeet, 1, 1000);
+          requireRange("Width", widthFeet, 1, 1000);
+          return lengthFeet * widthFeet;
+        }
+
+        function calculateDrawnOutlineArea(points) {
+          if (!Array.isArray(points) || points.length < 3) {
+            throw new RangeError("A drawn outline needs at least three corners.");
+          }
+
+          let edgeSum = 0;
+          for (let index = 0; index < points.length; index += 1) {
+            const first = points[index];
+            const second = points[(index + 1) % points.length];
+            requireRange("Latitude", first.lat, -85.05, 85.05);
+            requireRange("Longitude", first.lng, -180, 180);
+            requireRange("Latitude", second.lat, -85.05, 85.05);
+            requireRange("Longitude", second.lng, -180, 180);
+
+            const lat1 = first.lat * Math.PI / 180;
+            const lat2 = second.lat * Math.PI / 180;
+            const lon1 = first.lng * Math.PI / 180;
+            const lon2 = second.lng * Math.PI / 180;
+            let longitudeDifference = lon2 - lon1;
+            if (longitudeDifference > Math.PI) {
+              longitudeDifference -= Math.PI * 2;
+            } else if (longitudeDifference < -Math.PI) {
+              longitudeDifference += Math.PI * 2;
+            }
+            edgeSum += longitudeDifference *
+              (2 + Math.sin(lat1) + Math.sin(lat2));
+          }
+
+          const areaSquareMeters =
+            earthRadiusMeters * earthRadiusMeters * Math.abs(edgeSum) / 2;
+          return areaSquareMeters * squareMetersToSquareFeet;
+        }
+
+        function calculateOrderVolume(areaSquareFeet, thicknessInches, wastePercent) {
+          requireRange("Slab area", areaSquareFeet, 0, Number.MAX_VALUE);
+          requireRange("Slab thickness", thicknessInches, 1, 36);
+          requireRange("Waste allowance", wastePercent, 0, 25);
+          const volumeBeforeRounding =
+            areaSquareFeet * thicknessInches / 12 / 27 * (1 + wastePercent / 100);
+          return Math.ceil(volumeBeforeRounding * 2 - 1e-10) / 2;
+        }
+
+        function calculateTruckloadCount(orderVolume, truckCapacity) {
+          requireRange("Order volume", orderVolume, 0.5, Number.MAX_VALUE);
+          requireRange("Truck capacity", truckCapacity, 1, 20);
+          return Math.ceil(orderVolume / truckCapacity - 1e-12);
+        }
+
+        function calculateFinalTruckloadVolume(orderVolume, truckCapacity) {
+          const count = calculateTruckloadCount(orderVolume, truckCapacity);
+          const finalLoad = orderVolume - truckCapacity * (count - 1);
+          return Math.abs(finalLoad - truckCapacity) < 1e-9
+            ? truckCapacity
+            : finalLoad;
+        }
+
+        function calculateFullUnloadIntervalMinutes(truckCapacity, placementRate) {
+          requireRange("Truck capacity", truckCapacity, 1, 20);
+          requireRange("Placement rate", placementRate, 1, 120);
+          return 60 * truckCapacity / placementRate;
+        }
+
+        function calculateTruckRotationCount(
+          truckloadCount,
+          travelMinutes,
+          truckCapacity,
+          placementRate,
+          washoutMinutes
+        ) {
+          requireRange("Truckloads", truckloadCount, 1, Number.MAX_VALUE);
+          requireRange("One-way travel time", travelMinutes, 0, 240);
+          requireRange("Washout and reload time", washoutMinutes, 1, 120);
+          const unloadMinutes =
+            calculateFullUnloadIntervalMinutes(truckCapacity, placementRate);
+          const roundTripMinutes = 2 * travelMinutes + unloadMinutes + washoutMinutes;
+          return Math.min(
+            truckloadCount,
+            Math.ceil(roundTripMinutes / unloadMinutes - 1e-12)
+          );
+        }
+
+        function calculatePourDurationMinutes(orderVolume, truckCapacity, placementRate) {
+          const truckloadCount = calculateTruckloadCount(orderVolume, truckCapacity);
+          const fullUnloadMinutes =
+            calculateFullUnloadIntervalMinutes(truckCapacity, placementRate);
+          const finalUnloadMinutes = 60 *
+            calculateFinalTruckloadVolume(orderVolume, truckCapacity) /
+            requireRange("Placement rate", placementRate, 1, 120);
+          return (truckloadCount - 1) * fullUnloadMinutes + finalUnloadMinutes;
+        }
+
+        function formatClockTime(hour, minute) {
+          const suffix = hour < 12 ? "AM" : "PM";
+          const displayHour = hour % 12 || 12;
+          return displayHour + ":" + String(minute).padStart(2, "0") + " " + suffix;
+        }
+
+        function calculateFinishTime(startTime, durationMinutes) {
+          const match = /^([01]\d|2[0-3]):([0-5]\d)$/.exec(startTime);
+          if (!match) {
+            throw new RangeError("First truck arrival must be a valid local time.");
+          }
+          requireRange("Pour duration", durationMinutes, 0, Number.MAX_VALUE);
+          const startMinutes = Number(match[1]) * 60 + Number(match[2]);
+          const finishTotalMinutes = Math.round(startMinutes + durationMinutes);
+          const daysLater = Math.floor(finishTotalMinutes / (24 * 60));
+          const finishMinutes = finishTotalMinutes % (24 * 60);
+          const clockTime = formatClockTime(
+            Math.floor(finishMinutes / 60),
+            finishMinutes % 60
+          );
+          const daySuffix = daysLater === 1
+            ? " (next day)"
+            : daysLater > 1
+              ? " (" + daysLater + " days later)"
+              : "";
+          return { clockTime, daysLater, display: clockTime + daySuffix };
+        }
+
+        return {
+          calculateRectangleArea,
+          calculateDrawnOutlineArea,
+          calculateOrderVolume,
+          calculateTruckloadCount,
+          calculateFinalTruckloadVolume,
+          calculateFullUnloadIntervalMinutes,
+          calculateTruckRotationCount,
+          calculatePourDurationMinutes,
+          calculateFinishTime,
+          formatClockTime
+        };
+      })();
+    </script>
     <script>
       (() => {
         const LAT_MIN = -85.05;
@@ -1168,6 +1332,23 @@
         const widthInput = document.getElementById("width");
         const drawButton = document.getElementById("draw-button");
         const cancelButton = document.getElementById("cancel-draw");
+        const calculationStatus = document.getElementById("calculation-status");
+        const mapOutputLabel = document.getElementById("map-output-label");
+        const summaryVolumeValue = document.getElementById("summary-volume-value");
+        const summaryVolumeNote = document.getElementById("summary-volume-note");
+        const summaryLoadsValue = document.getElementById("summary-loads-value");
+        const summaryLoadsNote = document.getElementById("summary-loads-note");
+        const summaryTrucksValue = document.getElementById("summary-trucks-value");
+        const summaryDurationValue = document.getElementById("summary-duration-value");
+        const summaryFinishValue = document.getElementById("summary-finish-value");
+        const summaryFinishNote = document.getElementById("summary-finish-note");
+        const thicknessInput = document.getElementById("thickness");
+        const wasteInput = document.getElementById("waste");
+        const capacityInput = document.getElementById("capacity");
+        const travelInput = document.getElementById("travel");
+        const placementInput = document.getElementById("placement");
+        const washoutInput = document.getElementById("washout");
+        const arrivalInput = document.getElementById("arrival");
 
         function setStatus(element, message, isError) {
           element.textContent = message;
@@ -1207,6 +1388,133 @@
         let previewMarkers = [];
         let drawing = false;
         let pointsBeforeDrawing = [];
+        let geometryMode = "drawn";
+
+        function formatArea(squareFeet) {
+          return Math.round(squareFeet).toLocaleString("en-US");
+        }
+
+        function formatDuration(minutes) {
+          const roundedMinutes = Math.round(minutes);
+          const hours = Math.floor(roundedMinutes / 60);
+          const remainingMinutes = roundedMinutes % 60;
+          if (hours === 0) {
+            return remainingMinutes + " min";
+          }
+          return remainingMinutes === 0
+            ? hours + " h"
+            : hours + " h " + remainingMinutes + " min";
+        }
+
+        function clearCalculatedOutputs(message, isError) {
+          mapOutputLabel.textContent = "Calculated results unavailable";
+          summaryVolumeValue.textContent = "—";
+          summaryVolumeNote.textContent = "Correct the input or slab outline";
+          summaryLoadsValue.textContent = "—";
+          summaryLoadsNote.textContent = "No current load estimate";
+          summaryTrucksValue.textContent = "—";
+          summaryDurationValue.textContent = "—";
+          summaryFinishValue.textContent = "—";
+          summaryFinishNote.textContent = "A valid slab and arrival time are required";
+          calculationStatus.textContent = message;
+          calculationStatus.classList.toggle("error", Boolean(isError));
+        }
+
+        function updateCalculatedOutputs() {
+          const settings = [
+            thicknessInput,
+            wasteInput,
+            capacityInput,
+            travelInput,
+            placementInput,
+            washoutInput,
+            arrivalInput
+          ];
+          if (settings.some((input) => !input.checkValidity())) {
+            clearCalculatedOutputs("Enter values within the specified input ranges.", true);
+            return;
+          }
+          if (typedMode.checked &&
+              (!lengthInput.value || !widthInput.value ||
+               !lengthInput.checkValidity() || !widthInput.checkValidity())) {
+            clearCalculatedOutputs("Enter valid length and width values to calculate the pour.", true);
+            return;
+          }
+          if (currentPoints.length < 3) {
+            clearCalculatedOutputs("Complete a valid slab outline to calculate the pour.", false);
+            return;
+          }
+
+          try {
+            const areaSquareFeet = geometryMode === "typed"
+              ? ConcreteCalculations.calculateRectangleArea(
+                Number(lengthInput.value),
+                Number(widthInput.value)
+              )
+              : ConcreteCalculations.calculateDrawnOutlineArea(currentPoints);
+            const orderVolume = ConcreteCalculations.calculateOrderVolume(
+              areaSquareFeet,
+              Number(thicknessInput.value),
+              Number(wasteInput.value)
+            );
+            const truckloadCount = ConcreteCalculations.calculateTruckloadCount(
+              orderVolume,
+              Number(capacityInput.value)
+            );
+            const finalLoadVolume =
+              ConcreteCalculations.calculateFinalTruckloadVolume(
+                orderVolume,
+                Number(capacityInput.value)
+              );
+            const fullUnloadMinutes =
+              ConcreteCalculations.calculateFullUnloadIntervalMinutes(
+                Number(capacityInput.value),
+                Number(placementInput.value)
+              );
+            const trucksInRotation =
+              ConcreteCalculations.calculateTruckRotationCount(
+                truckloadCount,
+                Number(travelInput.value),
+                Number(capacityInput.value),
+                Number(placementInput.value),
+                Number(washoutInput.value)
+              );
+            const pourDurationMinutes =
+              ConcreteCalculations.calculatePourDurationMinutes(
+                orderVolume,
+                Number(capacityInput.value),
+                Number(placementInput.value)
+              );
+            const finishTime = ConcreteCalculations.calculateFinishTime(
+              arrivalInput.value,
+              pourDurationMinutes
+            );
+            const startParts = arrivalInput.value.split(":").map(Number);
+
+            mapOutputLabel.innerHTML =
+              "Area " + formatArea(areaSquareFeet) + " ft<sup>2</sup> · order " +
+              orderVolume.toFixed(1) + " cy";
+            summaryVolumeValue.textContent = orderVolume.toFixed(1);
+            summaryVolumeNote.textContent = "Includes " + wasteInput.value + "% waste";
+            summaryLoadsValue.textContent = String(truckloadCount);
+            summaryLoadsNote.textContent =
+              Number(fullUnloadMinutes.toFixed(1)) + " min spacing · final " +
+              finalLoadVolume.toFixed(1) + " cy";
+            summaryTrucksValue.textContent = String(trucksInRotation);
+            summaryDurationValue.textContent = formatDuration(pourDurationMinutes);
+            summaryFinishValue.textContent = finishTime.display;
+            summaryFinishNote.textContent =
+              "First truck at " + ConcreteCalculations.formatClockTime(startParts[0], startParts[1]);
+            calculationStatus.textContent =
+              "Calculated from the current slab and inputs. Timeline and order summary are Stage 4 previews.";
+            calculationStatus.classList.remove("error");
+          } catch (error) {
+            if (!(error instanceof RangeError)) {
+              throw error;
+            }
+            clearCalculatedOutputs(error.message, true);
+          }
+        }
 
         tiles.on("tileerror", () => {
           setStatus(mapStatus, "Some satellite tiles could not be loaded. Check your connection.", true);
@@ -1304,9 +1612,10 @@
           previewMarkers = [];
         }
 
-        function renderSlab(points, message) {
+        function renderSlab(points, message, mode) {
           clearSlabLayers();
           currentPoints = points.map((point) => L.latLng(point.lat, point.lng));
+          geometryMode = mode || "drawn";
           slabPolygon = L.polygon(currentPoints, {
             color: "#0c7774",
             weight: 3,
@@ -1356,11 +1665,15 @@
                 L.latLng(changedPoint.lat, changedPoint.lng)
               );
               slabPolygon.setLatLngs(currentPoints);
-              setStatus(mapStatus, "Corner moved. Calculated results remain static placeholders in Stage 2.", false);
+              geometryMode = "drawn";
+              mapMode.checked = true;
+              updateMode();
+              setStatus(mapStatus, "Corner moved; the area and pour summary are updated.", false);
             });
             cornerMarkers.push(marker);
           });
           setStatus(mapStatus, message, false);
+          updateCalculatedOutputs();
         }
 
         function rectanglePoints(lengthFeet, widthFeet, center) {
@@ -1382,14 +1695,18 @@
           if (!lengthInput.value || !widthInput.value) {
             clearSlabLayers();
             currentPoints = [];
+            geometryMode = "typed";
             setStatus(dimensionStatus, "Enter both length and width to draw the rectangle.", false);
+            updateCalculatedOutputs();
             return;
           }
 
           if (!lengthInput.checkValidity() || !widthInput.checkValidity()) {
             clearSlabLayers();
             currentPoints = [];
+            geometryMode = "typed";
             setStatus(dimensionStatus, "Use dimensions from 1 to 1,000 ft in 0.1 ft steps.", true);
+            updateCalculatedOutputs();
             return;
           }
 
@@ -1401,12 +1718,14 @@
           if (!isValidOutline(points)) {
             clearSlabLayers();
             currentPoints = [];
+            geometryMode = "typed";
             setStatus(dimensionStatus, "This rectangle would extend beyond the supported map limits.", true);
+            updateCalculatedOutputs();
             return;
           }
 
-          renderSlab(points, "Typed rectangle drawn at the map center. Results remain static placeholders.");
-          setStatus(dimensionStatus, "Rectangle shown at the map center; calculated results remain static.", false);
+          renderSlab(points, "Typed rectangle drawn at the map center.", "typed");
+          setStatus(dimensionStatus, "Rectangle shown at the map center; calculations use the typed dimensions.", false);
         }
 
         function updateMode() {
@@ -1424,12 +1743,15 @@
           if (isTyped) {
             clearSlabLayers();
             currentPoints = [];
+            geometryMode = "typed";
             setStatus(modeStatus, "Type dimensions selected", false);
             drawTypedRectangle();
           } else {
+            geometryMode = "drawn";
             setStatus(modeStatus, "Map drawing selected", false);
             setStatus(dimensionStatus, "Typed dimensions have no defaults and are required in typed mode.", false);
             setStatus(mapStatus, "Drag a corner to edit the outline, or draw a new slab.", false);
+            updateCalculatedOutputs();
           }
         }
 
@@ -1442,6 +1764,8 @@
             L.latLng(point.lat, point.lng)
           );
           clearSlabLayers();
+          currentPoints = [];
+          geometryMode = "drawn";
           drawingPoints = [];
           drawing = true;
           map.getContainer().classList.add("leaflet-crosshair");
@@ -1450,6 +1774,7 @@
           cancelButton.hidden = false;
           setStatus(modeStatus, "Drawing outline", false);
           setStatus(mapStatus, "Click at least three corners. Double-click or click the first corner to finish.", false);
+          updateCalculatedOutputs();
         }
 
         function restoreDrawControls() {
@@ -1472,6 +1797,7 @@
           } else {
             currentPoints = [];
             setStatus(mapStatus, "Drawing cancelled.", false);
+            updateCalculatedOutputs();
           }
           setStatus(modeStatus, "Map drawing selected", false);
         }
@@ -1489,7 +1815,7 @@
           );
           removePreview();
           restoreDrawControls();
-          renderSlab(completedPoints, "Outline complete. Drag a corner to edit it; results remain static placeholders.");
+          renderSlab(completedPoints, "Outline complete. Drag a corner to edit it; the area and pour summary are updated.");
           setStatus(modeStatus, "Map drawing selected", false);
         }
 
@@ -1555,12 +1881,24 @@
         typedMode.addEventListener("change", updateMode);
         lengthInput.addEventListener("input", drawTypedRectangle);
         widthInput.addEventListener("input", drawTypedRectangle);
+        [
+          thicknessInput,
+          wasteInput,
+          capacityInput,
+          travelInput,
+          placementInput,
+          washoutInput,
+          arrivalInput
+        ].forEach((input) => {
+          input.addEventListener("input", updateCalculatedOutputs);
+        });
 
         document.querySelectorAll(".field input").forEach((input) => {
           input.addEventListener("change", () => {
             if (!input.checkValidity()) {
               input.reportValidity();
             }
+            updateCalculatedOutputs();
           });
         });
 

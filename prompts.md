@@ -56,3 +56,16 @@
   corners, typed dimensions, and range checks in `index.html`.
 - Worked: Yes; verified tile attribution, drawing, editing, typed rectangle
   input, range rejection, and the responsive layout in a browser.
+- Asked: Build only Stage 3 with core slab and pour calculations, live summary
+  cards, and validation, while keeping the truck timeline and order summary
+  static.
+- Changed: Added named calculation functions and connected them to the map,
+  typed dimensions, summary cards, and invalid-input status in `index.html`.
+- Worked: Yes; verified the default 40 ft x 60 ft case, the 20 ft x 20 ft
+  case, the drawn-area validation outline, overnight finish time, map drawing
+  and corner editing updates, and invalid-input clearing in the browser.
+- Asked: Test the existing polygon area function with the specified four
+  coordinates, report the area and pass/fail, and do not build anything.
+- Changed: No app code or build artifacts; recorded this request here.
+- Worked: Yes; the existing function returned 101,804.20 ft^2, within 1% of
+  the expected 101,800 ft^2.
