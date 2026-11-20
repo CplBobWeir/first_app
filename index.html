@@ -3,8 +3,1226 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Web App</title>
+    <meta name="theme-color" content="#f3f6f7">
+    <title>Concrete Pour Planner</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --ink: #1d3035;
+        --muted: #718187;
+        --line: #e4eaeb;
+        --panel: #ffffff;
+        --canvas: #f3f6f7;
+        --accent: #0c7774;
+        --accent-dark: #075e5c;
+        --accent-soft: #e2f2ef;
+        --blue: #5795c5;
+        --blue-soft: #dcebf6;
+        --gold: #d4a84e;
+        --gold-soft: #f7edda;
+        --purple: #967ac5;
+        --purple-soft: #eee8f8;
+        --wash: #a8b7b9;
+        --shadow: 0 10px 30px rgba(27, 55, 60, 0.06);
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background: var(--canvas);
+        color: var(--ink);
+        font-size: 14px;
+        line-height: 1.5;
+      }
+
+      button,
+      input {
+        font: inherit;
+      }
+
+      button {
+        cursor: default;
+      }
+
+      .app-shell {
+        width: min(1440px, 100%);
+        margin: 0 auto;
+        padding: 28px 32px 48px;
+      }
+
+      .app-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+        margin-bottom: 24px;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 13px;
+      }
+
+      .brand-mark {
+        display: grid;
+        width: 42px;
+        height: 42px;
+        place-items: center;
+        border-radius: 12px;
+        background: var(--accent);
+        color: white;
+        font-size: 13px;
+        font-weight: 800;
+        letter-spacing: 0.04em;
+      }
+
+      .brand h1 {
+        margin: 0;
+        font-size: 21px;
+        font-weight: 720;
+        letter-spacing: -0.035em;
+        line-height: 1.2;
+      }
+
+      .brand p {
+        margin: 4px 0 0;
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .stage-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 12px;
+        border: 1px solid #d6e8e4;
+        border-radius: 999px;
+        background: #f7fbfa;
+        color: var(--accent-dark);
+        font-size: 11px;
+        font-weight: 750;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        white-space: nowrap;
+      }
+
+      .stage-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: #37a184;
+      }
+
+      .prototype-note {
+        margin: 0 0 20px;
+        padding: 10px 14px;
+        border: 1px solid #dce8e7;
+        border-radius: 10px;
+        background: #edf5f4;
+        color: #42615f;
+        font-size: 12px;
+      }
+
+      .workspace {
+        display: grid;
+        grid-template-columns: minmax(0, 0.96fr) minmax(0, 1.04fr);
+        align-items: start;
+        gap: 22px;
+      }
+
+      .column {
+        display: grid;
+        min-width: 0;
+        gap: 20px;
+      }
+
+      .card {
+        min-width: 0;
+        overflow: hidden;
+        border: 1px solid rgba(220, 229, 230, 0.9);
+        border-radius: 16px;
+        background: var(--panel);
+        box-shadow: var(--shadow);
+      }
+
+      .card-pad {
+        padding: 20px;
+      }
+
+      .card-heading {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: 16px;
+      }
+
+      .card-heading h2 {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 720;
+        letter-spacing: -0.02em;
+      }
+
+      .card-heading p {
+        margin: 4px 0 0;
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .eyebrow {
+        display: block;
+        margin-bottom: 4px;
+        color: var(--muted);
+        font-size: 10px;
+        font-weight: 750;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+      }
+
+      .quiet-pill {
+        padding: 5px 9px;
+        border-radius: 999px;
+        background: #f1f5f5;
+        color: #5f7277;
+        font-size: 11px;
+        font-weight: 650;
+        white-space: nowrap;
+      }
+
+      .map-preview {
+        position: relative;
+        min-height: 300px;
+        overflow: hidden;
+        border: 1px solid #d8e1de;
+        border-radius: 12px;
+        background:
+          radial-gradient(ellipse at 18% 24%, rgba(181, 190, 145, 0.78) 0 9%, transparent 10%),
+          radial-gradient(ellipse at 76% 75%, rgba(167, 177, 133, 0.68) 0 14%, transparent 15%),
+          radial-gradient(ellipse at 73% 20%, rgba(199, 193, 157, 0.56) 0 11%, transparent 12%),
+          linear-gradient(135deg, #aab69d 0%, #c2c0a2 25%, #aab7a3 47%, #c4c5a9 72%, #a6b39e 100%);
+      }
+
+      .map-preview::before,
+      .map-preview::after {
+        position: absolute;
+        content: "";
+        pointer-events: none;
+      }
+
+      .map-preview::before {
+        top: 43%;
+        left: -8%;
+        width: 120%;
+        height: 20px;
+        transform: rotate(-16deg);
+        border: 5px solid rgba(238, 235, 213, 0.85);
+        border-right: 0;
+        border-left: 0;
+        background: rgba(159, 166, 147, 0.5);
+      }
+
+      .map-preview::after {
+        top: -12%;
+        left: 67%;
+        width: 18px;
+        height: 125%;
+        transform: rotate(25deg);
+        border: 4px solid rgba(239, 236, 215, 0.8);
+        border-top: 0;
+        border-bottom: 0;
+        background: rgba(159, 166, 147, 0.42);
+      }
+
+      .map-grid {
+        position: absolute;
+        inset: 0;
+        background-image:
+          linear-gradient(rgba(255, 255, 255, 0.11) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255, 255, 255, 0.11) 1px, transparent 1px);
+        background-size: 38px 38px;
+        pointer-events: none;
+      }
+
+      .map-topline {
+        position: absolute;
+        z-index: 1;
+        top: 12px;
+        left: 12px;
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        padding: 7px 10px;
+        border: 1px solid rgba(255, 255, 255, 0.72);
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.92);
+        color: #3e5653;
+        font-size: 11px;
+        font-weight: 650;
+        box-shadow: 0 2px 8px rgba(30, 48, 40, 0.08);
+      }
+
+      .map-pin {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--accent);
+        box-shadow: 0 0 0 3px rgba(12, 119, 116, 0.15);
+      }
+
+      .map-toolbar {
+        position: absolute;
+        z-index: 1;
+        top: 12px;
+        right: 12px;
+        display: grid;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.75);
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.94);
+        box-shadow: 0 2px 8px rgba(30, 48, 40, 0.08);
+      }
+
+      .map-toolbar span {
+        display: grid;
+        width: 32px;
+        height: 31px;
+        place-items: center;
+        color: #38514d;
+        font-size: 16px;
+        font-weight: 650;
+      }
+
+      .map-toolbar span + span {
+        border-top: 1px solid #e5e9e5;
+      }
+
+      .road-label {
+        position: absolute;
+        z-index: 1;
+        color: rgba(54, 68, 56, 0.74);
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: 0.09em;
+        text-transform: uppercase;
+      }
+
+      .road-label.one {
+        top: 27%;
+        left: 14%;
+        transform: rotate(-16deg);
+      }
+
+      .road-label.two {
+        right: 15%;
+        bottom: 23%;
+        transform: rotate(25deg);
+      }
+
+      .slab-shape {
+        position: absolute;
+        z-index: 2;
+        top: 43%;
+        left: 41%;
+        display: grid;
+        width: 135px;
+        height: 82px;
+        transform: translate(-50%, -50%) rotate(-12deg);
+        place-content: center;
+        border: 2px solid #fff;
+        border-radius: 4px;
+        background: rgba(12, 119, 116, 0.78);
+        color: #fff;
+        text-align: center;
+        box-shadow: 0 3px 10px rgba(17, 58, 54, 0.24);
+      }
+
+      .slab-shape strong {
+        font-size: 12px;
+        line-height: 1.3;
+      }
+
+      .slab-shape span {
+        margin-top: 3px;
+        font-size: 10px;
+      }
+
+      .map-label {
+        position: absolute;
+        z-index: 3;
+        top: calc(43% + 50px);
+        left: 41%;
+        transform: translateX(-50%);
+        padding: 6px 9px;
+        border-radius: 7px;
+        background: #fff;
+        color: var(--ink);
+        font-size: 10px;
+        font-weight: 700;
+        white-space: nowrap;
+        box-shadow: 0 2px 9px rgba(30, 48, 40, 0.15);
+      }
+
+      .map-footer {
+        position: absolute;
+        right: 10px;
+        bottom: 9px;
+        left: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        color: rgba(37, 57, 48, 0.82);
+        font-size: 10px;
+        font-weight: 650;
+        text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
+      }
+
+      .map-note {
+        margin: 10px 0 0;
+        color: var(--muted);
+        font-size: 11px;
+      }
+
+      .draw-button,
+      .copy-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        min-height: 37px;
+        padding: 0 12px;
+        border: 1px solid var(--accent);
+        border-radius: 9px;
+        background: var(--accent);
+        color: #fff;
+        font-size: 12px;
+        font-weight: 700;
+        white-space: nowrap;
+      }
+
+      .draw-button {
+        position: absolute;
+        z-index: 4;
+        right: 12px;
+        bottom: 41px;
+      }
+
+      .draw-button span {
+        font-size: 16px;
+        line-height: 1;
+      }
+
+      .hint {
+        display: flex;
+        align-items: flex-start;
+        gap: 9px;
+        margin-top: 15px;
+        padding: 10px 12px;
+        border-radius: 9px;
+        background: #f3f7f6;
+        color: #53686a;
+        font-size: 11px;
+      }
+
+      .hint-mark {
+        display: grid;
+        flex: 0 0 17px;
+        width: 17px;
+        height: 17px;
+        place-items: center;
+        border-radius: 50%;
+        background: var(--accent-soft);
+        color: var(--accent-dark);
+        font-size: 11px;
+        font-weight: 800;
+      }
+
+      fieldset {
+        min-width: 0;
+        margin: 0;
+        padding: 0;
+        border: 0;
+      }
+
+      legend {
+        width: 100%;
+        margin-bottom: 9px;
+        color: var(--ink);
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .mode-options {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 9px;
+        margin-bottom: 13px;
+      }
+
+      .mode-option {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        min-height: 39px;
+        padding: 8px 10px;
+        border: 1px solid var(--line);
+        border-radius: 9px;
+        color: #52666a;
+        font-size: 11px;
+        font-weight: 650;
+      }
+
+      .mode-option.selected {
+        border-color: #9dcac2;
+        background: #f0f8f6;
+        color: var(--accent-dark);
+      }
+
+      .mode-option input {
+        margin: 0;
+        accent-color: var(--accent);
+      }
+
+      .form-divider {
+        height: 1px;
+        margin: 16px 0;
+        background: var(--line);
+      }
+
+      .section-caption {
+        margin: 0 0 10px;
+        color: #5d7074;
+        font-size: 11px;
+        font-weight: 700;
+      }
+
+      .field-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px 14px;
+      }
+
+      .field {
+        min-width: 0;
+      }
+
+      .field label {
+        display: block;
+        margin-bottom: 5px;
+        color: #354b50;
+        font-size: 11px;
+        font-weight: 650;
+      }
+
+      .input-wrap {
+        position: relative;
+      }
+
+      .input-wrap input {
+        width: 100%;
+        height: 39px;
+        padding: 0 42px 0 11px;
+        border: 1px solid #dce4e5;
+        border-radius: 8px;
+        outline: none;
+        background: #fbfcfc;
+        color: var(--ink);
+        font-size: 13px;
+        font-weight: 650;
+      }
+
+      .input-wrap input[readonly] {
+        cursor: default;
+      }
+
+      .unit {
+        position: absolute;
+        top: 50%;
+        right: 10px;
+        transform: translateY(-50%);
+        color: #849397;
+        font-size: 10px;
+        pointer-events: none;
+      }
+
+      .field-help {
+        margin: 4px 0 0;
+        color: #879599;
+        font-size: 9px;
+        line-height: 1.35;
+      }
+
+      .mode-help {
+        margin: -4px 0 0;
+        color: #829195;
+        font-size: 10px;
+      }
+
+      .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 11px;
+      }
+
+      .metric-card {
+        min-height: 112px;
+        padding: 14px;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: #fff;
+      }
+
+      .metric-label {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        color: #6d7f83;
+        font-size: 10px;
+        font-weight: 700;
+        line-height: 1.3;
+      }
+
+      .metric-icon {
+        display: grid;
+        flex: 0 0 25px;
+        width: 25px;
+        height: 25px;
+        place-items: center;
+        border-radius: 8px;
+        background: var(--accent-soft);
+        color: var(--accent-dark);
+        font-size: 12px;
+        font-weight: 800;
+      }
+
+      .metric-value {
+        display: block;
+        margin-top: 10px;
+        color: var(--ink);
+        font-size: clamp(20px, 2vw, 27px);
+        font-weight: 760;
+        letter-spacing: -0.05em;
+        line-height: 1;
+      }
+
+      .metric-sub {
+        display: block;
+        margin-top: 6px;
+        color: #89979a;
+        font-size: 10px;
+      }
+
+      .metric-card.finish .metric-icon {
+        background: #f7edda;
+        color: #926b23;
+      }
+
+      .timeline-card .card-pad {
+        padding-bottom: 16px;
+      }
+
+      .legend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px 14px;
+        margin: 0 0 14px;
+      }
+
+      .legend-item {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        color: #6e7d81;
+        font-size: 10px;
+      }
+
+      .legend-swatch {
+        width: 10px;
+        height: 10px;
+        border-radius: 3px;
+      }
+
+      .outbound {
+        background: var(--blue);
+      }
+
+      .unloading {
+        background: var(--accent);
+      }
+
+      .returning {
+        background: var(--gold);
+      }
+
+      .washout {
+        background: var(--purple);
+      }
+
+      .timeline-scroll {
+        overflow-x: auto;
+        padding-bottom: 5px;
+      }
+
+      .timeline-inner {
+        min-width: 650px;
+      }
+
+      .time-axis {
+        display: grid;
+        grid-template-columns: repeat(9, minmax(0, 1fr));
+        margin: 0 0 4px 90px;
+        color: #819094;
+        font-size: 9px;
+      }
+
+      .time-axis span {
+        transform: translateX(-50%);
+        white-space: nowrap;
+      }
+
+      .time-axis span:first-child {
+        transform: none;
+      }
+
+      .time-axis span:last-child {
+        transform: translateX(-100%);
+        text-align: right;
+      }
+
+      .load-row {
+        display: grid;
+        grid-template-columns: 90px minmax(0, 1fr);
+        align-items: center;
+        min-height: 43px;
+        border-top: 1px solid #f0f3f3;
+      }
+
+      .load-label {
+        padding-right: 10px;
+        color: #53666a;
+        font-size: 10px;
+        font-weight: 700;
+        line-height: 1.35;
+      }
+
+      .load-label span {
+        display: block;
+        color: #879498;
+        font-size: 9px;
+        font-weight: 500;
+      }
+
+      .time-track {
+        position: relative;
+        height: 27px;
+        border-radius: 5px;
+        background-color: #fafcfc;
+        background-image: linear-gradient(to right, #e6ecec 1px, transparent 1px);
+        background-size: 12.5% 100%;
+      }
+
+      .segment {
+        position: absolute;
+        top: 3px;
+        display: flex;
+        height: 21px;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        border-radius: 4px;
+        color: white;
+        font-size: 8px;
+        font-weight: 750;
+        letter-spacing: 0.02em;
+        white-space: nowrap;
+      }
+
+      .segment.outbound {
+        background: var(--blue);
+      }
+
+      .segment.unloading {
+        background: var(--accent);
+      }
+
+      .segment.returning {
+        background: var(--gold);
+        color: #493811;
+      }
+
+      .segment.washout {
+        background: var(--purple);
+      }
+
+      .timeline-footnote {
+        margin: 9px 0 0 90px;
+        color: #879599;
+        font-size: 10px;
+      }
+
+      .order-box {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        align-items: center;
+        gap: 16px;
+        padding: 14px;
+        border: 1px solid #dce9e6;
+        border-radius: 11px;
+        background: #f8fbfa;
+      }
+
+      .order-text {
+        margin: 0;
+        color: #334a4d;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-size: 11px;
+        line-height: 1.65;
+        overflow-wrap: anywhere;
+      }
+
+      .order-text strong {
+        color: var(--accent-dark);
+      }
+
+      .copy-button {
+        border-color: #d1e4e0;
+        background: #fff;
+        color: var(--accent-dark);
+      }
+
+      .copy-button span {
+        font-size: 15px;
+        line-height: 1;
+      }
+
+      .footer-note {
+        margin: 17px 2px 0;
+        color: #8a979a;
+        font-size: 10px;
+        text-align: center;
+      }
+
+      @media (max-width: 980px) {
+        .app-shell {
+          padding: 23px 20px 36px;
+        }
+
+        .workspace {
+          grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+          gap: 16px;
+        }
+
+        .column {
+          gap: 16px;
+        }
+
+        .card-pad {
+          padding: 17px;
+        }
+
+        .metric-card {
+          padding: 11px;
+        }
+      }
+
+      @media (max-width: 720px) {
+        .app-shell {
+          padding: 18px 14px 28px;
+        }
+
+        .app-header {
+          margin-bottom: 17px;
+        }
+
+        .brand h1 {
+          font-size: 18px;
+        }
+
+        .brand p {
+          max-width: 230px;
+          font-size: 11px;
+        }
+
+        .stage-badge {
+          padding: 7px 9px;
+          font-size: 9px;
+        }
+
+        .workspace {
+          grid-template-columns: minmax(0, 1fr);
+          gap: 16px;
+        }
+
+        .column {
+          gap: 16px;
+        }
+
+        .map-preview {
+          min-height: 270px;
+        }
+
+        .summary-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .metric-card {
+          min-height: 103px;
+          padding: 13px;
+        }
+
+        .timeline-inner {
+          min-width: 650px;
+        }
+      }
+
+      @media (max-width: 420px) {
+        .brand-mark {
+          width: 37px;
+          height: 37px;
+        }
+
+        .brand h1 {
+          font-size: 16px;
+        }
+
+        .stage-badge {
+          gap: 5px;
+          font-size: 8px;
+        }
+
+        .card-pad {
+          padding: 15px;
+        }
+
+        .field-grid {
+          gap: 11px 9px;
+        }
+
+        .order-box {
+          grid-template-columns: 1fr;
+          align-items: start;
+        }
+
+        .copy-button {
+          justify-self: start;
+        }
+      }
+    </style>
   </head>
   <body>
+    <div class="app-shell">
+      <header class="app-header">
+        <div class="brand">
+          <div class="brand-mark" aria-hidden="true">CP</div>
+          <div>
+            <h1>Concrete Pour Planner</h1>
+            <p>Slab quantities and truck scheduling</p>
+          </div>
+        </div>
+        <div class="stage-badge"><span class="stage-dot"></span>Stage 1 mockup</div>
+      </header>
+
+      <p class="prototype-note">
+        Static layout preview. Values are illustrative placeholders; controls,
+        map drawing, and copy are not connected, and no calculations run.
+      </p>
+
+      <main class="workspace">
+        <div class="column">
+          <section class="card" aria-labelledby="map-title">
+            <div class="card-pad">
+              <div class="card-heading">
+                <div>
+                  <span class="eyebrow">Site layout</span>
+                  <h2 id="map-title">Slab outline</h2>
+                  <p>BYU campus · 40.2518, -111.6493</p>
+                </div>
+                <span class="quiet-pill">Zoom 18</span>
+              </div>
+
+              <div class="map-preview" role="img" aria-label="Mock map preview with a 40 by 60 foot slab outline">
+                <div class="map-grid"></div>
+                <div class="map-topline"><span class="map-pin"></span>BYU campus</div>
+                <div class="map-toolbar" aria-hidden="true">
+                  <span>+</span><span>-</span>
+                </div>
+                <span class="road-label one">Campus Drive</span>
+                <span class="road-label two">University Parkway</span>
+                <div class="slab-shape">
+                  <strong>40 x 60 ft slab</strong>
+                  <span>Example outline</span>
+                </div>
+                <div class="map-label">2,400 ft<sup>2</sup> · 47.0 cy to order</div>
+                <button class="draw-button" type="button"><span aria-hidden="true">+</span>Draw slab</button>
+                <div class="map-footer">
+                  <span>Illustrative map preview</span>
+                  <span>Imagery attribution appears with the live map</span>
+                </div>
+              </div>
+              <p class="map-note">Example slab is centered on the map. Draw at least three corners to outline a slab.</p>
+              <div class="hint">
+                <span class="hint-mark" aria-hidden="true">i</span>
+                <span>Start with the map outline, or enter rectangular dimensions in the inputs.</span>
+              </div>
+            </div>
+          </section>
+
+          <section class="card" aria-labelledby="inputs-title">
+            <div class="card-pad">
+              <div class="card-heading">
+                <div>
+                  <span class="eyebrow">Pour setup</span>
+                  <h2 id="inputs-title">Inputs</h2>
+                  <p>Values shown are sample settings for this mockup.</p>
+                </div>
+                <span class="quiet-pill">Example values</span>
+              </div>
+
+              <fieldset>
+                <legend>Slab outline</legend>
+                <div class="mode-options">
+                  <label class="mode-option selected">
+                    <input type="radio" name="slab-mode" checked>
+                    Draw on map
+                  </label>
+                  <label class="mode-option">
+                    <input type="radio" name="slab-mode">
+                    Type dimensions
+                  </label>
+                </div>
+                <div class="field-grid">
+                  <div class="field">
+                    <label for="length">Length</label>
+                    <div class="input-wrap">
+                      <input id="length" type="number" value="40" min="1" max="1000" step="0.1" readonly>
+                      <span class="unit">ft</span>
+                    </div>
+                    <p class="field-help">1-1,000 ft · 0.1 ft steps · sample only</p>
+                  </div>
+                  <div class="field">
+                    <label for="width">Width</label>
+                    <div class="input-wrap">
+                      <input id="width" type="number" value="60" min="1" max="1000" step="0.1" readonly>
+                      <span class="unit">ft</span>
+                    </div>
+                    <p class="field-help">1-1,000 ft · 0.1 ft steps · sample only</p>
+                  </div>
+                </div>
+                <p class="mode-help">Typed dimensions have no defaults and are required when that mode is selected.</p>
+              </fieldset>
+
+              <div class="form-divider"></div>
+              <p class="section-caption">Concrete and delivery settings</p>
+
+              <div class="field-grid">
+                <div class="field">
+                  <label for="thickness">Slab thickness</label>
+                  <div class="input-wrap">
+                    <input id="thickness" type="number" value="6" min="1" max="36" step="0.25" readonly>
+                    <span class="unit">in</span>
+                  </div>
+                  <p class="field-help">1-36 in · default 6</p>
+                </div>
+                <div class="field">
+                  <label for="waste">Waste allowance</label>
+                  <div class="input-wrap">
+                    <input id="waste" type="number" value="5" min="0" max="25" step="1" readonly>
+                    <span class="unit">%</span>
+                  </div>
+                  <p class="field-help">0-25% · default 5</p>
+                </div>
+                <div class="field">
+                  <label for="capacity">Truck capacity</label>
+                  <div class="input-wrap">
+                    <input id="capacity" type="number" value="10" min="1" max="20" step="0.5" readonly>
+                    <span class="unit">cy</span>
+                  </div>
+                  <p class="field-help">1-20 cy · default 10</p>
+                </div>
+                <div class="field">
+                  <label for="travel">One-way travel</label>
+                  <div class="input-wrap">
+                    <input id="travel" type="number" value="20" min="0" max="240" step="1" readonly>
+                    <span class="unit">min</span>
+                  </div>
+                  <p class="field-help">0-240 min · default 20</p>
+                </div>
+                <div class="field">
+                  <label for="placement">Placement rate</label>
+                  <div class="input-wrap">
+                    <input id="placement" type="number" value="30" min="1" max="120" step="1" readonly>
+                    <span class="unit">cy/hr</span>
+                  </div>
+                  <p class="field-help">1-120 cy/hr · default 30</p>
+                </div>
+                <div class="field">
+                  <label for="washout">Washout and reload</label>
+                  <div class="input-wrap">
+                    <input id="washout" type="number" value="10" min="1" max="120" step="1" readonly>
+                    <span class="unit">min</span>
+                  </div>
+                  <p class="field-help">1-120 min · default 10</p>
+                </div>
+                <div class="field">
+                  <label for="arrival">First truck arrival</label>
+                  <div class="input-wrap">
+                    <input id="arrival" type="time" value="07:00" readonly>
+                    <span class="unit">local</span>
+                  </div>
+                  <p class="field-help">Local time · minute precision</p>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <div class="column">
+          <section class="card" aria-labelledby="summary-title">
+            <div class="card-pad">
+              <div class="card-heading">
+                <div>
+                  <span class="eyebrow">Pour overview</span>
+                  <h2 id="summary-title">Order summary</h2>
+                  <p>Illustrative results for the example slab</p>
+                </div>
+                <span class="quiet-pill">Preview</span>
+              </div>
+
+              <div class="summary-grid">
+                <article class="metric-card">
+                  <div class="metric-label"><span class="metric-icon">CY</span>Concrete to order</div>
+                  <strong class="metric-value">47.0 <small>cy</small></strong>
+                  <span class="metric-sub">Includes 5% waste</span>
+                </article>
+                <article class="metric-card">
+                  <div class="metric-label"><span class="metric-icon">#</span>Truckloads</div>
+                  <strong class="metric-value">5</strong>
+                  <span class="metric-sub">Last load: 7 cy</span>
+                </article>
+                <article class="metric-card">
+                  <div class="metric-label"><span class="metric-icon">T</span>Trucks in rotation</div>
+                  <strong class="metric-value">4</strong>
+                  <span class="metric-sub">To keep the pour moving</span>
+                </article>
+                <article class="metric-card">
+                  <div class="metric-label"><span class="metric-icon">D</span>Pour duration</div>
+                  <strong class="metric-value">1h 34m</strong>
+                  <span class="metric-sub">First arrival to finish</span>
+                </article>
+                <article class="metric-card finish">
+                  <div class="metric-label"><span class="metric-icon">F</span>Finish time</div>
+                  <strong class="metric-value">8:34 <small>AM</small></strong>
+                  <span class="metric-sub">First truck at 7:00 AM</span>
+                </article>
+              </div>
+            </div>
+          </section>
+
+          <section class="card timeline-card" aria-labelledby="timeline-title">
+            <div class="card-pad">
+              <div class="card-heading">
+                <div>
+                  <span class="eyebrow">Delivery plan</span>
+                  <h2 id="timeline-title">Truck timeline</h2>
+                  <p>One row per load · arrivals every 20 minutes</p>
+                </div>
+                <span class="quiet-pill">Local time</span>
+              </div>
+
+              <div class="legend" aria-label="Timeline legend">
+                <span class="legend-item"><span class="legend-swatch outbound"></span>Travel out</span>
+                <span class="legend-item"><span class="legend-swatch unloading"></span>Unloading</span>
+                <span class="legend-item"><span class="legend-swatch returning"></span>Return</span>
+                <span class="legend-item"><span class="legend-swatch washout"></span>Washout</span>
+              </div>
+
+              <div class="timeline-scroll">
+                <div class="timeline-inner" role="img" aria-label="Static truck schedule from 6:40 AM to 9:20 AM">
+                  <div class="time-axis" aria-hidden="true">
+                    <span>6:40</span><span>7:00</span><span>7:20</span><span>7:40</span>
+                    <span>8:00</span><span>8:20</span><span>8:40</span><span>9:00</span><span>9:20</span>
+                  </div>
+
+                  <div class="load-row">
+                    <div class="load-label">Load 1 <span>Truck 1 · 10 cy</span></div>
+                    <div class="time-track">
+                      <span class="segment outbound" style="left:0%;width:12.5%" title="Travel out · 6:40-7:00 AM">OUT</span>
+                      <span class="segment unloading" style="left:12.5%;width:12.5%" title="Unloading · 7:00-7:20 AM">UNLOAD</span>
+                      <span class="segment returning" style="left:25%;width:12.5%" title="Return · 7:20-7:40 AM">RETURN</span>
+                      <span class="segment washout" style="left:37.5%;width:6.25%" title="Washout/reload · 7:40-7:50 AM">W</span>
+                    </div>
+                  </div>
+                  <div class="load-row">
+                    <div class="load-label">Load 2 <span>Truck 2 · 10 cy</span></div>
+                    <div class="time-track">
+                      <span class="segment outbound" style="left:12.5%;width:12.5%" title="Travel out · 7:00-7:20 AM">OUT</span>
+                      <span class="segment unloading" style="left:25%;width:12.5%" title="Unloading · 7:20-7:40 AM">UNLOAD</span>
+                      <span class="segment returning" style="left:37.5%;width:12.5%" title="Return · 7:40-8:00 AM">RETURN</span>
+                      <span class="segment washout" style="left:50%;width:6.25%" title="Washout/reload · 8:00-8:10 AM">W</span>
+                    </div>
+                  </div>
+                  <div class="load-row">
+                    <div class="load-label">Load 3 <span>Truck 3 · 10 cy</span></div>
+                    <div class="time-track">
+                      <span class="segment outbound" style="left:25%;width:12.5%" title="Travel out · 7:20-7:40 AM">OUT</span>
+                      <span class="segment unloading" style="left:37.5%;width:12.5%" title="Unloading · 7:40-8:00 AM">UNLOAD</span>
+                      <span class="segment returning" style="left:50%;width:12.5%" title="Return · 8:00-8:20 AM">RETURN</span>
+                      <span class="segment washout" style="left:62.5%;width:6.25%" title="Washout/reload · 8:20-8:30 AM">W</span>
+                    </div>
+                  </div>
+                  <div class="load-row">
+                    <div class="load-label">Load 4 <span>Truck 4 · 10 cy</span></div>
+                    <div class="time-track">
+                      <span class="segment outbound" style="left:37.5%;width:12.5%" title="Travel out · 7:40-8:00 AM">OUT</span>
+                      <span class="segment unloading" style="left:50%;width:12.5%" title="Unloading · 8:00-8:20 AM">UNLOAD</span>
+                      <span class="segment returning" style="left:62.5%;width:12.5%" title="Return · 8:20-8:40 AM">RETURN</span>
+                      <span class="segment washout" style="left:75%;width:6.25%" title="Washout/reload · 8:40-8:50 AM">W</span>
+                    </div>
+                  </div>
+                  <div class="load-row">
+                    <div class="load-label">Load 5 <span>Truck 1 · 7 cy</span></div>
+                    <div class="time-track">
+                      <span class="segment outbound" style="left:50%;width:12.5%" title="Travel out · 8:00-8:20 AM">OUT</span>
+                      <span class="segment unloading" style="left:62.5%;width:8.75%" title="Unloading · 8:20-8:34 AM">PARTIAL</span>
+                      <span class="segment returning" style="left:71.25%;width:12.5%" title="Return · 8:34-8:54 AM">RETURN</span>
+                      <span class="segment washout" style="left:83.75%;width:6.25%" title="Washout/reload · 8:54-9:04 AM">W</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <p class="timeline-footnote">Hover over a segment to see its illustrative time range.</p>
+            </div>
+          </section>
+
+          <section class="card" aria-labelledby="order-title">
+            <div class="card-pad">
+              <div class="card-heading">
+                <div>
+                  <span class="eyebrow">Ready to call in</span>
+                  <h2 id="order-title">Order summary</h2>
+                  <p>Plain-text order for the batch plant</p>
+                </div>
+              </div>
+              <div class="order-box">
+                <p class="order-text"><strong>Concrete pour order</strong><br>
+                  47.0 cubic yards · 5 loads<br>
+                  First arrival: 7:00 AM<br>
+                  Truck spacing: 20 minutes
+                </p>
+                <button class="copy-button" type="button"><span aria-hidden="true">▢</span>Copy</button>
+              </div>
+            </div>
+          </section>
+        </div>
+      </main>
+      <p class="footer-note">Stage 1 page-layout mockup · Results and controls are static examples</p>
+    </div>
   </body>
 </html>

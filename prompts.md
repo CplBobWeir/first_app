@@ -39,3 +39,14 @@
   11:00 PM start case with next-day arrivals and finish.
 - Worked: Yes; existing validation cases and app behavior requirements were
   preserved, and no app was built.
+- Asked: Add the five agreed build stages and their tests to the end of
+  `spec.md`, without building the app or changing `index.html`.
+- Changed: Added a Build stages section with stage tasks and completion
+  checks.
+- Worked: Yes; existing sections and `index.html` were left unchanged.
+- Asked: Build only Stage 1 as a single-file static page mockup with realistic
+  placeholder inputs, outputs, and timeline.
+- Changed: Replaced the empty `index.html` with a responsive HTML/CSS mockup;
+  no calculations or functional map behavior were added.
+- Worked: Yes; rendered and checked desktop and mobile layouts, with no app
+  calculations or functional map behavior.

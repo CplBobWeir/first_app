@@ -134,3 +134,30 @@ planning a slab pour and calling in the order to the batch plant.
 ## Out of scope
 - Reinforcement, finishing crews, pump trucks, weather, and costs.
 - Saving plans.
+
+## Build stages
+1. **Static layout mockup (no real calculations):** Arrange the map area and
+   inputs on the left, with summary cards, timeline, and order summary on the
+   right. Use placeholders and apply the specified visual style.
+   **Test:** Confirm the desktop layout is clear, all planned sections are
+   visible, and mobile sections stack in the specified order.
+2. **Map and slab input:** Add Leaflet and attributed imagery tiles, show the
+   40 ft x 60 ft example slab, and support drawing/editing an outline and
+   entering typed dimensions.
+   **Test:** Confirm the map opens at the specified BYU location and zoom;
+   drawing, dragging corners, and typed rectangles work; and latitude limits
+   are respected. Outputs may remain placeholders.
+3. **Core calculations and summary cards:** Implement area for drawn and
+   typed slabs, volume rounding, truckloads, unload intervals, required truck
+   rotation, pour duration, and finish time.
+   **Test:** Match validation cases 1-3, including the 7 cy final load and
+   14-minute unload in case 1.
+4. **Truck timeline and order summary:** Show each load's travel, unloading,
+   return, and washout/reload segments; add the order text and copy action.
+   **Test:** Confirm segment times and arrival spacing match case 1; case 4
+   crosses midnight and finishes at 12:34 AM the next day.
+5. **Final validation and polish:** Verify input limits/defaults, immediate
+   updates, map attribution, and the complete responsive layout.
+   **Test:** Re-run all validation cases, confirm the required mobile order,
+   and check that invalid or out-of-range inputs cannot produce misleading
+   results.
