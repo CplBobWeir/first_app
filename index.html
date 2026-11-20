@@ -340,6 +340,22 @@
         color: #a43535;
       }
 
+      .timeline-status,
+      .copy-status {
+        margin: 0 0 8px;
+        color: #64777b;
+        font-size: 10px;
+      }
+
+      .timeline-status.error,
+      .copy-status.error {
+        color: #a43535;
+      }
+
+      .copy-status.success {
+        color: var(--accent-dark);
+      }
+
       .hint {
         display: flex;
         align-items: flex-start;
@@ -612,7 +628,7 @@
 
       .time-axis {
         display: grid;
-        grid-template-columns: repeat(9, minmax(0, 1fr));
+        grid-template-columns: repeat(var(--tick-count, 9), minmax(0, 1fr));
         margin: 0 0 4px 90px;
         color: #819094;
         font-size: 9px;
@@ -621,6 +637,7 @@
       .time-axis span {
         transform: translateX(-50%);
         white-space: nowrap;
+        text-align: center;
       }
 
       .time-axis span:first-child {
@@ -678,6 +695,12 @@
         font-weight: 750;
         letter-spacing: 0.02em;
         white-space: nowrap;
+      }
+
+      .segment:focus-visible {
+        z-index: 1;
+        outline: 2px solid #142b30;
+        outline-offset: 1px;
       }
 
       .segment.outbound {
@@ -862,12 +885,12 @@
             <p>Slab quantities and truck scheduling</p>
           </div>
         </div>
-        <div class="stage-badge"><span class="stage-dot"></span>Stage 3 · Core calculations</div>
+        <div class="stage-badge"><span class="stage-dot"></span>Stage 4 · Schedule and order</div>
       </header>
 
       <p class="prototype-note">
-        Slab geometry and summary calculations update with valid inputs. The
-        truck timeline and order summary remain static Stage 4 previews.
+        Slab geometry, pour calculations, truck schedule, and order summary
+        update together whenever the inputs change.
       </p>
 
       <main class="workspace">
@@ -1031,7 +1054,7 @@
                 <span class="quiet-pill">Live calculations</span>
               </div>
               <p id="calculation-status" class="calculation-status" role="status" aria-live="polite">
-                Calculations are ready. The timeline and order summary remain static previews.
+                Calculations, timeline, and order summary are ready.
               </p>
 
               <div class="summary-grid">
@@ -1070,7 +1093,7 @@
                 <div>
                   <span class="eyebrow">Delivery plan</span>
                   <h2 id="timeline-title">Truck timeline</h2>
-                  <p>Static Stage 4 example · arrivals every 20 minutes</p>
+                  <p id="timeline-details">Schedule details update with the current inputs.</p>
                 </div>
                 <span class="quiet-pill">Local time</span>
               </div>
@@ -1079,64 +1102,17 @@
                 <span class="legend-item"><span class="legend-swatch outbound"></span>Travel out</span>
                 <span class="legend-item"><span class="legend-swatch unloading"></span>Unloading</span>
                 <span class="legend-item"><span class="legend-swatch returning"></span>Return</span>
-                <span class="legend-item"><span class="legend-swatch washout"></span>Washout</span>
+                <span class="legend-item"><span class="legend-swatch washout"></span>Washout/reload</span>
               </div>
 
+              <p id="timeline-status" class="timeline-status" role="status" aria-live="polite"></p>
               <div class="timeline-scroll">
-                <div class="timeline-inner" role="img" aria-label="Static truck schedule from 6:40 AM to 9:20 AM">
-                  <div class="time-axis" aria-hidden="true">
-                    <span>6:40</span><span>7:00</span><span>7:20</span><span>7:40</span>
-                    <span>8:00</span><span>8:20</span><span>8:40</span><span>9:00</span><span>9:20</span>
-                  </div>
-
-                  <div class="load-row">
-                    <div class="load-label">Load 1 <span>Truck 1 · 10 cy</span></div>
-                    <div class="time-track">
-                      <span class="segment outbound" style="left:0%;width:12.5%" title="Travel out · 6:40-7:00 AM">OUT</span>
-                      <span class="segment unloading" style="left:12.5%;width:12.5%" title="Unloading · 7:00-7:20 AM">UNLOAD</span>
-                      <span class="segment returning" style="left:25%;width:12.5%" title="Return · 7:20-7:40 AM">RETURN</span>
-                      <span class="segment washout" style="left:37.5%;width:6.25%" title="Washout/reload · 7:40-7:50 AM">W</span>
-                    </div>
-                  </div>
-                  <div class="load-row">
-                    <div class="load-label">Load 2 <span>Truck 2 · 10 cy</span></div>
-                    <div class="time-track">
-                      <span class="segment outbound" style="left:12.5%;width:12.5%" title="Travel out · 7:00-7:20 AM">OUT</span>
-                      <span class="segment unloading" style="left:25%;width:12.5%" title="Unloading · 7:20-7:40 AM">UNLOAD</span>
-                      <span class="segment returning" style="left:37.5%;width:12.5%" title="Return · 7:40-8:00 AM">RETURN</span>
-                      <span class="segment washout" style="left:50%;width:6.25%" title="Washout/reload · 8:00-8:10 AM">W</span>
-                    </div>
-                  </div>
-                  <div class="load-row">
-                    <div class="load-label">Load 3 <span>Truck 3 · 10 cy</span></div>
-                    <div class="time-track">
-                      <span class="segment outbound" style="left:25%;width:12.5%" title="Travel out · 7:20-7:40 AM">OUT</span>
-                      <span class="segment unloading" style="left:37.5%;width:12.5%" title="Unloading · 7:40-8:00 AM">UNLOAD</span>
-                      <span class="segment returning" style="left:50%;width:12.5%" title="Return · 8:00-8:20 AM">RETURN</span>
-                      <span class="segment washout" style="left:62.5%;width:6.25%" title="Washout/reload · 8:20-8:30 AM">W</span>
-                    </div>
-                  </div>
-                  <div class="load-row">
-                    <div class="load-label">Load 4 <span>Truck 4 · 10 cy</span></div>
-                    <div class="time-track">
-                      <span class="segment outbound" style="left:37.5%;width:12.5%" title="Travel out · 7:40-8:00 AM">OUT</span>
-                      <span class="segment unloading" style="left:50%;width:12.5%" title="Unloading · 8:00-8:20 AM">UNLOAD</span>
-                      <span class="segment returning" style="left:62.5%;width:12.5%" title="Return · 8:20-8:40 AM">RETURN</span>
-                      <span class="segment washout" style="left:75%;width:6.25%" title="Washout/reload · 8:40-8:50 AM">W</span>
-                    </div>
-                  </div>
-                  <div class="load-row">
-                    <div class="load-label">Load 5 <span>Truck 1 · 7 cy</span></div>
-                    <div class="time-track">
-                      <span class="segment outbound" style="left:50%;width:12.5%" title="Travel out · 8:00-8:20 AM">OUT</span>
-                      <span class="segment unloading" style="left:62.5%;width:8.75%" title="Unloading · 8:20-8:34 AM">PARTIAL</span>
-                      <span class="segment returning" style="left:71.25%;width:12.5%" title="Return · 8:34-8:54 AM">RETURN</span>
-                      <span class="segment washout" style="left:83.75%;width:6.25%" title="Washout/reload · 8:54-9:04 AM">W</span>
-                    </div>
-                  </div>
+                <div id="timeline-inner" class="timeline-inner" role="group" aria-label="Truck schedule">
+                  <div id="timeline-axis" class="time-axis" aria-label="Local clock-time axis"></div>
+                  <div id="timeline-rows" class="timeline-rows" role="list" aria-label="Truckload schedules"></div>
                 </div>
               </div>
-              <p class="timeline-footnote">Hover over a segment to see its illustrative time range.</p>
+              <p class="timeline-footnote">Hover over or focus a colored segment to see its start and end times. Day offsets mark midnight crossings.</p>
             </div>
           </section>
 
@@ -1146,22 +1122,23 @@
                 <div>
                   <span class="eyebrow">Ready to call in</span>
                   <h2 id="order-title">Order summary</h2>
-                  <p>Static Stage 4 preview · not connected to current inputs</p>
+                  <p>Order details for the current pour</p>
                 </div>
               </div>
               <div class="order-box">
                 <p class="order-text"><strong>Concrete pour order</strong><br>
-                  47.0 cubic yards · 5 loads<br>
-                  First arrival: 7:00 AM<br>
-                  Truck spacing: 20 minutes
+                  <span id="order-volume-text">47.0 cubic yards · 5 loads</span><br>
+                  <span id="order-arrival-text">First arrival: 7:00 AM</span><br>
+                  <span id="order-spacing-text">Truck spacing: 20 minutes</span>
                 </p>
-                <button class="copy-button" type="button"><span aria-hidden="true">▢</span>Copy</button>
+                <button id="copy-order-button" class="copy-button" type="button" disabled><span aria-hidden="true">▢</span>Copy</button>
               </div>
+              <p id="copy-status" class="copy-status" role="status" aria-live="polite"></p>
             </div>
           </section>
         </div>
       </main>
-      <p class="footer-note">Stage 3 · Calculated summary values · Timeline and order summary remain static previews</p>
+      <p class="footer-note">Stage 4 · Live truck schedule and order summary</p>
     </div>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
       integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
@@ -1349,6 +1326,16 @@
         const placementInput = document.getElementById("placement");
         const washoutInput = document.getElementById("washout");
         const arrivalInput = document.getElementById("arrival");
+        const timelineDetails = document.getElementById("timeline-details");
+        const timelineStatus = document.getElementById("timeline-status");
+        const timelineInner = document.getElementById("timeline-inner");
+        const timelineAxis = document.getElementById("timeline-axis");
+        const timelineRows = document.getElementById("timeline-rows");
+        const orderVolumeText = document.getElementById("order-volume-text");
+        const orderArrivalText = document.getElementById("order-arrival-text");
+        const orderSpacingText = document.getElementById("order-spacing-text");
+        const copyOrderButton = document.getElementById("copy-order-button");
+        const copyStatus = document.getElementById("copy-status");
 
         function setStatus(element, message, isError) {
           element.textContent = message;
@@ -1389,6 +1376,7 @@
         let drawing = false;
         let pointsBeforeDrawing = [];
         let geometryMode = "drawn";
+        let currentOrderText = "";
 
         function formatArea(squareFeet) {
           return Math.round(squareFeet).toLocaleString("en-US");
@@ -1406,6 +1394,237 @@
             : hours + " h " + remainingMinutes + " min";
         }
 
+        function formatMinutes(minutes) {
+          return String(Number(minutes.toFixed(1)));
+        }
+
+        function formatLoadCount(count) {
+          return count + (count === 1 ? " load" : " loads");
+        }
+
+        function formatScheduleTime(totalMinutes) {
+          const roundedMinutes = Math.round(totalMinutes);
+          const dayOffset = Math.floor(roundedMinutes / (24 * 60));
+          const minutesInDay = (roundedMinutes % (24 * 60) + 24 * 60) % (24 * 60);
+          const clockTime = ConcreteCalculations.formatClockTime(
+            Math.floor(minutesInDay / 60),
+            minutesInDay % 60
+          );
+          const daySuffix = dayOffset === 1
+            ? " (+1 day)"
+            : dayOffset > 1
+              ? " (+" + dayOffset + " days)"
+              : dayOffset === -1
+                ? " (-1 day)"
+                : dayOffset < -1
+                  ? " (" + dayOffset + " days)"
+                  : "";
+          return clockTime + daySuffix;
+        }
+
+        function chooseAxisInterval(spanMinutes) {
+          const intervals = [5, 10, 15, 20, 30, 60, 90, 120, 180, 240, 360, 480, 720, 1440, 2880];
+          return intervals.find((interval) => spanMinutes / interval <= 8) ||
+            Math.ceil(spanMinutes / (8 * 60)) * 60;
+        }
+
+        function clearScheduleAndOrder(message, isError) {
+          timelineDetails.textContent = "Schedule details update with the current inputs.";
+          timelineAxis.replaceChildren();
+          timelineAxis.style.removeProperty("--tick-count");
+          timelineRows.replaceChildren();
+          timelineInner.setAttribute("aria-label", "Truck schedule unavailable");
+          timelineStatus.textContent = message;
+          timelineStatus.classList.toggle("error", Boolean(isError));
+          orderVolumeText.textContent = "Order unavailable";
+          orderArrivalText.textContent = "A valid slab and inputs are required";
+          orderSpacingText.textContent = "";
+          currentOrderText = "";
+          copyOrderButton.disabled = true;
+          copyStatus.textContent = "";
+          copyStatus.classList.remove("error", "success");
+        }
+
+        function appendTimelineSegment(track, type, label, start, end, axisStart, spanMinutes) {
+          const segment = document.createElement("span");
+          const description = type === "outbound"
+            ? "Travel out"
+            : type === "unloading"
+              ? "Unloading"
+              : type === "returning"
+                ? "Return"
+                : "Washout/reload";
+          const timeRange = formatScheduleTime(start) + " to " + formatScheduleTime(end);
+          const accessibleDescription = description + " · " + timeRange;
+          segment.className = "segment " + type;
+          segment.style.left = ((start - axisStart) / spanMinutes * 100) + "%";
+          segment.style.width = ((end - start) / spanMinutes * 100) + "%";
+          segment.title = accessibleDescription;
+          segment.setAttribute("aria-label", accessibleDescription);
+          segment.tabIndex = 0;
+          segment.textContent = label;
+          track.appendChild(segment);
+        }
+
+        function updateScheduleAndOrder(schedule) {
+          const firstArrivalMinutes = schedule.startMinutes;
+          const finalArrivalMinutes = firstArrivalMinutes +
+            (schedule.truckloadCount - 1) * schedule.fullUnloadMinutes;
+          const finalUnloadMinutes = schedule.pourDurationMinutes -
+            (schedule.truckloadCount - 1) * schedule.fullUnloadMinutes;
+          const axisStartBound = firstArrivalMinutes - schedule.travelMinutes;
+          const axisEndBound = finalArrivalMinutes + finalUnloadMinutes +
+            schedule.travelMinutes + schedule.washoutMinutes;
+          const tickInterval = chooseAxisInterval(axisEndBound - axisStartBound);
+          const axisStart = Math.floor(axisStartBound / tickInterval) * tickInterval;
+          const axisEnd = Math.ceil(axisEndBound / tickInterval) * tickInterval;
+          const spanMinutes = Math.max(tickInterval, axisEnd - axisStart);
+          const tickCount = Math.round(spanMinutes / tickInterval) + 1;
+
+          timelineDetails.textContent =
+            formatLoadCount(schedule.truckloadCount) + " · arrivals every " +
+            formatMinutes(schedule.fullUnloadMinutes) + " min · first arrival " +
+            formatScheduleTime(firstArrivalMinutes);
+          timelineAxis.replaceChildren();
+          timelineAxis.style.setProperty("--tick-count", String(tickCount));
+          for (let tick = 0; tick <= tickCount - 1; tick += 1) {
+            const tickLabel = document.createElement("span");
+            tickLabel.textContent = formatScheduleTime(axisStart + tick * tickInterval);
+            timelineAxis.appendChild(tickLabel);
+          }
+
+          const rowsFragment = document.createDocumentFragment();
+          for (let index = 0; index < schedule.truckloadCount; index += 1) {
+            const arrivalMinutes = firstArrivalMinutes +
+              index * schedule.fullUnloadMinutes;
+            const loadVolume = index === schedule.truckloadCount - 1
+              ? schedule.finalLoadVolume
+              : schedule.truckCapacity;
+            const unloadMinutes = index === schedule.truckloadCount - 1
+              ? finalUnloadMinutes
+              : schedule.fullUnloadMinutes;
+            const unloadEnd = arrivalMinutes + unloadMinutes;
+            const returnEnd = unloadEnd + schedule.travelMinutes;
+            const washoutEnd = returnEnd + schedule.washoutMinutes;
+            const truckNumber = index % schedule.trucksInRotation + 1;
+            const row = document.createElement("div");
+            const loadLabel = document.createElement("div");
+            const loadDetail = document.createElement("span");
+            const track = document.createElement("div");
+
+            row.className = "load-row";
+            row.setAttribute("role", "listitem");
+            row.setAttribute(
+              "aria-label",
+              "Load " + (index + 1) + ", truck " + truckNumber +
+                ", " + loadVolume.toFixed(1) + " cubic yards, arrival " +
+                formatScheduleTime(arrivalMinutes)
+            );
+            loadLabel.className = "load-label";
+            loadLabel.appendChild(document.createTextNode("Load " + (index + 1)));
+            loadDetail.textContent =
+              "Truck " + truckNumber + " · " + loadVolume.toFixed(1) +
+              " cy · " + formatScheduleTime(arrivalMinutes);
+            loadLabel.appendChild(loadDetail);
+            track.className = "time-track";
+            track.style.backgroundSize =
+              (100 / Math.max(1, tickCount - 1)) + "% 100%";
+            appendTimelineSegment(
+              track,
+              "outbound",
+              "OUT",
+              arrivalMinutes - schedule.travelMinutes,
+              arrivalMinutes,
+              axisStart,
+              spanMinutes
+            );
+            appendTimelineSegment(
+              track,
+              "unloading",
+              index === schedule.truckloadCount - 1 &&
+                loadVolume < schedule.truckCapacity - 1e-9
+                ? "PARTIAL"
+                : "UNLOAD",
+              arrivalMinutes,
+              unloadEnd,
+              axisStart,
+              spanMinutes
+            );
+            appendTimelineSegment(
+              track,
+              "returning",
+              "RETURN",
+              unloadEnd,
+              returnEnd,
+              axisStart,
+              spanMinutes
+            );
+            appendTimelineSegment(
+              track,
+              "washout",
+              "WASH",
+              returnEnd,
+              washoutEnd,
+              axisStart,
+              spanMinutes
+            );
+            row.appendChild(loadLabel);
+            row.appendChild(track);
+            rowsFragment.appendChild(row);
+          }
+          timelineRows.replaceChildren(rowsFragment);
+          timelineInner.setAttribute(
+            "aria-label",
+            "Truck schedule from " + formatScheduleTime(axisStart) +
+              " through " + formatScheduleTime(axisEnd)
+          );
+          timelineStatus.textContent =
+            "Truck numbers rotate in order. Segment labels show travel, unloading, return, and washout/reload.";
+          timelineStatus.classList.remove("error");
+
+          orderVolumeText.textContent =
+            schedule.orderVolume.toFixed(1) + " cubic yards · " +
+            formatLoadCount(schedule.truckloadCount);
+          orderArrivalText.textContent =
+            "First arrival: " + formatScheduleTime(firstArrivalMinutes);
+          orderSpacingText.textContent =
+            "Truck spacing: " + formatMinutes(schedule.fullUnloadMinutes) + " minutes";
+          currentOrderText = [
+            "Concrete pour order",
+            schedule.orderVolume.toFixed(1) + " cubic yards · " +
+              formatLoadCount(schedule.truckloadCount),
+            "First arrival: " + formatScheduleTime(firstArrivalMinutes),
+            "Truck spacing: " + formatMinutes(schedule.fullUnloadMinutes) + " minutes"
+          ].join("\n");
+          copyOrderButton.disabled = false;
+          copyStatus.textContent = "";
+          copyStatus.classList.remove("error", "success");
+        }
+
+        async function copyOrderSummary() {
+          if (!currentOrderText) {
+            return;
+          }
+          try {
+            if (!navigator.clipboard ||
+                typeof navigator.clipboard.writeText !== "function") {
+              throw new Error("Clipboard access is unavailable in this browser.");
+            }
+            await navigator.clipboard.writeText(currentOrderText);
+            copyStatus.textContent = "Order summary copied to the clipboard.";
+            copyStatus.classList.remove("error");
+            copyStatus.classList.add("success");
+          } catch (error) {
+            const message = error instanceof Error
+              ? error.message
+              : "Clipboard permission was denied.";
+            copyStatus.textContent = "Could not copy the order summary. " + message;
+            copyStatus.classList.remove("success");
+            copyStatus.classList.add("error");
+            console.error("Could not copy the order summary to the clipboard.", error);
+          }
+        }
+
         function clearCalculatedOutputs(message, isError) {
           mapOutputLabel.textContent = "Calculated results unavailable";
           summaryVolumeValue.textContent = "—";
@@ -1418,6 +1637,7 @@
           summaryFinishNote.textContent = "A valid slab and arrival time are required";
           calculationStatus.textContent = message;
           calculationStatus.classList.toggle("error", Boolean(isError));
+          clearScheduleAndOrder(message, isError);
         }
 
         function updateCalculatedOutputs() {
@@ -1490,6 +1710,18 @@
               pourDurationMinutes
             );
             const startParts = arrivalInput.value.split(":").map(Number);
+            updateScheduleAndOrder({
+              orderVolume,
+              truckloadCount,
+              finalLoadVolume,
+              fullUnloadMinutes,
+              pourDurationMinutes,
+              trucksInRotation,
+              truckCapacity: Number(capacityInput.value),
+              travelMinutes: Number(travelInput.value),
+              washoutMinutes: Number(washoutInput.value),
+              startMinutes: startParts[0] * 60 + startParts[1]
+            });
 
             mapOutputLabel.innerHTML =
               "Area " + formatArea(areaSquareFeet) + " ft<sup>2</sup> · order " +
@@ -1506,7 +1738,7 @@
             summaryFinishNote.textContent =
               "First truck at " + ConcreteCalculations.formatClockTime(startParts[0], startParts[1]);
             calculationStatus.textContent =
-              "Calculated from the current slab and inputs. Timeline and order summary are Stage 4 previews.";
+              "Calculated from the current slab and inputs. Schedule and order details are up to date.";
             calculationStatus.classList.remove("error");
           } catch (error) {
             if (!(error instanceof RangeError)) {
@@ -1877,6 +2109,7 @@
 
         drawButton.addEventListener("click", startDrawing);
         cancelButton.addEventListener("click", cancelDrawing);
+        copyOrderButton.addEventListener("click", copyOrderSummary);
         mapMode.addEventListener("change", updateMode);
         typedMode.addEventListener("change", updateMode);
         lengthInput.addEventListener("input", drawTypedRectangle);

@@ -72,3 +72,15 @@
 - Asked: Commit the current changes.
 - Changed: Committed the Stage 3 implementation and test log.
 - Worked: Yes; the commit was created successfully.
+- Asked: Build only Stage 4 with a live truck timeline, an updating order
+  summary, and a working Copy button, preserving the existing single-file app.
+- Changed: Replaced the static timeline and order preview with generated
+  truckload rows, time-axis labels, midnight day offsets, final partial-load
+  unloading, and clipboard copy behavior in `index.html`.
+- Worked: Yes; verified default and overnight schedules, a single partial
+  load, live input updates, invalid-input clearing, clipboard contents, and
+  mobile layout in the browser.
+- Asked: Commit the Stage 4 changes.
+- Changed: Committed the live truck timeline, updating order summary, clipboard
+  action, and this request log.
+- Worked: Yes; the commit was created successfully.
