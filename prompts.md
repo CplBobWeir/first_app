@@ -12,3 +12,30 @@
 - Asked: Commit the updated project specification.
 - Changed: Committed the specification update and recorded this request.
 - Worked: Yes; the commit was created successfully.
+- Asked: Add ranges and controls to the existing Inputs section without
+  building the app.
+- Changed: Specified input controls and valid ranges while keeping existing
+  defaults and omitting available truck count.
+- Worked: Yes; the Inputs section was updated, with no app implementation.
+- Asked: Clarify polygon vertices, `start`, and `k` in the Calculations
+  section without changing other sections or building the app.
+- Changed: Defined the ordered polygon vertices and clarified the first
+  truckload arrival and truckload index.
+- Worked: Yes; only the Calculations section of `spec.md` was updated.
+- Asked: Update Calculations and Outputs to specify typed area, schedule
+  segments, finish times, midnight handling, and time units.
+- Changed: Added those calculation and output definitions while preserving
+  the existing validation values.
+- Worked: Yes; only the requested spec sections were changed, and no app was
+  built.
+- Asked: Specify the initial example slab and mobile stacking order in the
+  Look and feel section.
+- Changed: Defined the 40 ft x 60 ft example using existing defaults and the
+  requested mobile section order.
+- Worked: Yes; only the Look and feel section of `spec.md` was updated.
+- Asked: Restrict map latitude and add an overnight scheduling validation
+  case while preserving existing cases.
+- Changed: Limited map drawing to +/-85.05 degrees latitude and added the
+  11:00 PM start case with next-day arrivals and finish.
+- Worked: Yes; existing validation cases and app behavior requirements were
+  preserved, and no app was built.

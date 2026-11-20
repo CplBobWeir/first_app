@@ -20,60 +20,96 @@ planning a slab pour and calling in the order to the batch plant.
 
 ## Inputs
 - Slab outline, either:
-  - Drawn on the map: a "Draw slab" button, then click the corners and
-    double-click (or click the first point) to finish. Corners can be
-    dragged afterward. The map opens centered on BYU campus
-    (40.2518, -111.6493) at zoom 18. Or:
-  - Typed: length and width (ft) for a rectangular slab, which is drawn
-    on the map as a rectangle of that size at the map center.
-- Slab thickness (in), default 6.
-- Waste allowance (%), default 5.
-- Truck capacity (cubic yards), default 10.
-- One-way travel time from the batch plant (min), default 20.
-- Placement rate the crew can sustain (cubic yards per hour), default 30.
-- Washout and reload time at the plant (min), default 10.
-- Time the first truck should arrive, default 7:00 AM.
+  - Select map drawing or typed dimensions with a two-option radio group. The
+    map opens centered on BYU campus (40.2518, -111.6493) at zoom 18.
+  - Drawn on the map: use a "Draw slab" button, click at least three distinct
+    corners, then double-click (or click the first point) to finish. Corners
+    can be dragged afterward. The outline uses map coordinates (latitude
+    -85.05 to 85.05 degrees, longitude -180 to 180 degrees) and must form a
+    valid polygon. The example slab shown on load is the default.
+  - Typed: enter length and width in feet in number fields (0.1 ft steps,
+    range 1-1,000 ft for each dimension). No dimension defaults; both fields
+    are required in typed mode. The app draws a rectangle of those dimensions
+    at the map center.
+- Slab thickness: number field in inches, range 1-36 in, 0.25 in steps,
+  default 6.
+- Waste allowance: number field in percent, range 0-25%, 1% steps, default 5.
+- Truck capacity: number field in cubic yards, range 1-20 cy, 0.5 cy steps,
+  default 10.
+- One-way travel time from the batch plant: number field in minutes, range
+  0-240 min, 1 min steps, default 20.
+- Placement rate the crew can sustain: number field in cubic yards per hour,
+  range 1-120 cy/hr, 1 cy/hr steps, default 30.
+- Washout and reload time at the plant: number field in minutes, range
+  1-120 min, 1 min steps, default 10.
+- Time the first truck should arrive: local-time field with minute precision,
+  range 00:00-23:59, default 7:00 AM.
 
 ## Calculations
-- Slab area (ft^2). For a drawn outline, use
+- Slab area (ft^2): for a typed rectangle, area = length x width. For a drawn
+  outline, use
+  Let (lat_i, lon_i) denote polygon vertex coordinates in degrees, ordered
+  around the outline; convert them to radians for the formula. Each
+  edge uses consecutive vertices (lat1, lon1) and (lat2, lon2), including
+  the closing edge from the last vertex to the first.
   A = R^2 x |sum over edges of (lon2 - lon1) x (2 + sin lat1 + sin lat2)| / 2
   with angles in radians and R = 6,378,137 m, converted to ft^2
   (1 m^2 = 10.7639 ft^2).
 - Volume to order (cubic yards) =
   area x thickness / 12 / 27 x (1 + waste / 100), rounded up to the next
   0.5 cy.
-- Truckloads = volume / capacity, rounded up. Every load is full except
-  the last.
-- Unload time for a full truck = capacity / placement rate (hours).
-- Trucks arrive one unload time apart, so the crew never waits:
-  truck k (k = 1, 2, ...) arrives at start + (k - 1) x unload time.
-- Round trip for one truck = 2 x travel + unload time + washout.
-- Trucks needed in rotation = round trip / unload time, rounded up (but no
-  more than the number of loads). Loads are assigned to the trucks in
-  turn: truck 1, truck 2, and so on, then truck 1 again.
-- Pour duration runs from the first truck's arrival until the last truck
-  is empty.
+- Truckloads = volume to order / capacity, rounded up. Let N be the number of
+  truckloads and q_k the volume in truckload k: q_k = capacity for k < N,
+  and q_N = volume to order - capacity x (N - 1). Thus the last load is full
+  when the ordered volume is an exact multiple of capacity.
+- Unload time for a full truck = capacity / placement rate (hours). For
+  timing calculations, convert this to minutes: U_full = 60 x capacity /
+  placement rate. For truckload k, U_k = 60 x q_k / placement rate minutes;
+  this gives the shorter unload time for a partial final load.
+- Trucks arrive one full-truck unload time apart, so the crew never waits.
+  Start is the first truckload's arrival time. Truckload k (k = 1, 2, ...)
+  arrives at start + (k - 1) x U_full, with time additions in minutes.
+- For a truckload arriving at A_k, one-way travel time T, unload time U_k,
+  and washout/reload time W (all in minutes), its schedule segments are:
+  travel out from A_k - T to A_k; unloading from A_k to A_k + U_k; return
+  from A_k + U_k to A_k + U_k + T; and washout/reload from A_k + U_k + T
+  to A_k + U_k + T + W.
+- Round trip for a full truck = 2 x T + U_full + W, in minutes. Trucks needed
+  in rotation = round trip / U_full, rounded up (but no more than N loads).
+  Loads are assigned to the trucks in turn: truck 1, truck 2, and so on,
+  then truck 1 again.
+- Pour duration = (N - 1) x U_full + U_N minutes, from the first truckload's
+  arrival until the last truckload is empty. Finish time = start + pour
+  duration.
 
 ## Outputs
-- The slab drawn on the map with its area and volume on a label.
+- The slab drawn on the map with its area in ft^2 and its waste-adjusted,
+  rounded volume to order in cubic yards on a label.
 - Summary cards: concrete to order (cy), truckloads, trucks in rotation,
-  pour duration, and finish time.
+  pour duration (hours and minutes), and finish time (local clock time).
+  Times past midnight continue into the next calendar day and are indicated
+  as such.
 - A truck schedule as a timeline (like a Gantt chart): one row per
   truckload showing travel out, unloading, the trip back, and washout,
-  in different colors, on a clock-time axis. Hovering shows the times.
+  in different colors, on a local clock-time axis. Use the segment timings
+  from Calculations; spacing between truckload arrivals is U_full minutes.
+  The timeline continues into the next day when needed. Hovering shows each
+  segment's start and end times.
 - An "Order summary" box with a plain-text order for the batch plant
-  (volume, number of loads, first arrival, spacing between trucks) and a
-  "Copy" button.
+  (volume in cubic yards, number of loads, first arrival as local time, and
+  spacing between truckload arrivals in minutes) and a "Copy" button.
 - Everything updates immediately whenever an input changes.
 
 ## Look and feel
-- Opens with an example slab already drawn near the center of the map,
-  so it is useful the moment it opens.
+- Opens with a 40 ft x 60 ft rectangular example slab already drawn at the
+  center of the map, using the existing default input values, so it is useful
+  the moment it opens.
 - Clean and professional, like a commercial construction app: white
   cards with soft shadows, one accent color, a modern system font, large
   readable numbers on the summary cards.
 - Map and inputs on the left; summary, timeline, and order on the right.
-  On a phone, everything stacks.
+  On mobile screens, sections stack in this order: map, inputs, summary
+  cards, truck timeline, and order summary.
 - A short hint tells the user what to do next.
 
 ## Validation
@@ -91,6 +127,9 @@ planning a slab pour and calling in the order to the batch plant.
    an area of about 101,800 ft^2 (within 1%).
 3. Typed slab 20 ft x 20 ft x 4 in, 0% waste, 10 cy trucks: 400 ft^2,
    4.94 cy, order 5.0 cy, 1 truckload, 1 truck, pour duration 10 min.
+4. Same inputs as case 1, except the first truck arrives at 11:00 PM:
+   arrivals are 11:00 PM, 11:20 PM, 11:40 PM, 12:00 AM, and 12:20 AM the
+   next day; the pour finishes at 12:34 AM the next day.
 
 ## Out of scope
 - Reinforcement, finishing crews, pump trucks, weather, and costs.
