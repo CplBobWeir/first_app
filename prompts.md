@@ -113,3 +113,21 @@
 - Worked: Yes; cost cases 5-7 and original validation cases 1-4 passed.
   Negative, off-step, and blank prices cleared only the cost result. Mobile
   layout and section order checks also passed.
+- Asked: Update `spec.md` for the Download Truck Schedule feature, preserving
+  existing requirements and validation cases; edit only `spec.md` and
+  `prompts.md`, and do not modify `index.html` or build the feature.
+- Changed: Documented that no calculation inputs are added, defined the CSV
+  columns and next-day local-time notation, specified invalid-schedule
+  behavior, added validation cases 8-11 and a focused Build stage, and
+  clarified out-of-scope exports.
+- Worked: Yes; the existing cases 1-7 were preserved. `index.html` was not
+  modified and the app was not built.
+- Asked: Build only Stage 7, Download Truck Schedule, using existing schedule
+  calculations; test validation cases 8-11 and rerun the original cases.
+- Changed: Added the timeline download button and Excel-compatible UTF-8 CSV
+  with the requested load, truck, and segment-time columns; disabled and
+  cleared export data whenever the schedule is invalid.
+- Worked: Yes; cases 8-11 and original cases 1-7 passed, including the
+  partial final load, overnight offsets, invalid schedule disabling, and
+  schedule export remaining available when only concrete price is invalid.
+  The mobile button layout also passed.

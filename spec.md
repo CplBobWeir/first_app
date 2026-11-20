@@ -47,6 +47,9 @@ planning a slab pour and calling in the order to the batch plant.
   1-120 min, 1 min steps, default 10.
 - Time the first truck should arrive: local-time field with minute precision,
   range 00:00-23:59, default 7:00 AM.
+- Download Truck Schedule: no new calculation inputs are required. The export
+  uses the current slab and schedule settings and is unavailable when they do
+  not produce a valid schedule.
 
 ## Calculations
 - Slab area (ft^2): for a typed rectangle, area = length x width. For a drawn
@@ -80,6 +83,13 @@ planning a slab pour and calling in the order to the batch plant.
   travel out from A_k - T to A_k; unloading from A_k to A_k + U_k; return
   from A_k + U_k to A_k + U_k + T; and washout/reload from A_k + U_k + T
   to A_k + U_k + T + W.
+- The schedule CSV introduces no new planning calculations. For load k, use
+  the existing arrival A_k, unload duration U_k, travel time T, and washout
+  time W. The assigned truck is ((k - 1) mod M) + 1, where M is the number of
+  trucks in rotation. Unloading starts at A_k and ends at A_k + U_k; the
+  return trip starts at unload end and ends at unload end + T; washout/reload
+  completion is return end + W. Format times as local clock time and append
+  (+1 day) to next-day times when a schedule crosses midnight.
 - Round trip for a full truck = 2 x T + U_full + W, in minutes. Trucks needed
   in rotation = round trip / U_full, rounded up (but no more than N loads).
   Loads are assigned to the trucks in turn: truck 1, truck 2, and so on,
@@ -105,6 +115,15 @@ planning a slab pour and calling in the order to the batch plant.
   from Calculations; spacing between truckload arrivals is U_full minutes.
   The timeline continues into the next day when needed. Hovering shows each
   segment's start and end times.
+- A "Download Truck Schedule" button by the timeline that downloads the
+  current schedule as an Excel-friendly CSV file named `truck-schedule.csv`.
+  Include a header row with these columns: load number, assigned truck,
+  arrival time, unloading start, unloading end, return start, return end, and
+  washout/reload completion time. Use local clock times and append `(+1 day)`
+  to next-day times. Disable the button when the current slab or schedule
+  inputs are invalid so an invalid or stale schedule cannot be downloaded.
+  An invalid concrete price alone does not disable the download when the
+  schedule remains valid.
 - An "Order summary" box with a plain-text order for the batch plant
   (volume in cubic yards, number of loads, first arrival as local time, and
   spacing between truckload arrivals in minutes) and a "Copy" button.
@@ -148,11 +167,27 @@ planning a slab pour and calling in the order to the batch plant.
 7. Same slab and delivery inputs as case 1 with a negative price or a price
    not in $0.01 increments: the price is invalid and the cost estimate is
    cleared, while valid pour and schedule results remain visible.
+8. Export the schedule for case 1: the CSV has a header row and five load
+   rows; arrivals are 7:00 AM, 7:20 AM, 7:40 AM, 8:00 AM, and 8:20 AM, with
+   assigned trucks 1, 2, 3, 4, and 1.
+9. Check the fifth CSV row for case 1, the 7-cy partial final load: arrival
+   and unloading start 8:20 AM, unloading end and return start 8:34 AM,
+   return end 8:54 AM, and washout/reload completion 9:04 AM.
+10. Export the schedule for case 4, starting at 11:00 PM: all times after
+    midnight include `(+1 day)`. The fifth row has arrival and unloading
+    start at 12:20 AM (+1 day), unloading end and return start at 12:34 AM
+    (+1 day), return end at 12:54 AM (+1 day), and washout/reload completion
+    at 1:04 AM (+1 day).
+11. With an invalid slab or schedule input, the schedule is unavailable and
+    the download button is disabled; no stale schedule can be exported. An
+    invalid concrete price alone leaves a valid schedule export available.
 
 ## Out of scope
 - Taxes, delivery charges, and other fees. The basic concrete material cost
   estimate is in scope.
 - Reinforcement, finishing crews, pump trucks, and weather.
+- Native `.xlsx` workbooks, user-selected dates or time zones, export filters,
+  and additional reporting or calculations.
 - Saving plans.
 
 ## Build stages
@@ -185,3 +220,8 @@ planning a slab pour and calling in the order to the batch plant.
    estimated-cost summary card using the rounded order quantity.
    **Test:** Confirm validation cases 5-7: $7,050.00 at $150.00/cy, $0.00 at
    zero price, and invalid prices clearing only the cost estimate.
+7. **Download truck schedule:** Add a CSV download for the existing schedule
+   with per-load truck assignment and time segments; disable it when the
+   current schedule is invalid.
+   **Test:** Confirm validation cases 8-11, including the 7-cy final load,
+   overnight `(+1 day)` values, and disabled export for invalid schedules.

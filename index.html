@@ -731,6 +731,12 @@
         font-size: 10px;
       }
 
+      .timeline-export {
+        display: flex;
+        justify-content: flex-end;
+        margin: -5px 0 12px;
+      }
+
       .order-box {
         display: grid;
         grid-template-columns: 1fr auto;
@@ -890,7 +896,7 @@
             <p>Slab quantities, cost, and truck scheduling</p>
           </div>
         </div>
-        <div class="stage-badge"><span class="stage-dot"></span>Stage 6 · Concrete cost estimate</div>
+        <div class="stage-badge"><span class="stage-dot"></span>Stage 7 · Download truck schedule</div>
       </header>
 
       <p class="prototype-note">
@@ -1116,6 +1122,13 @@
                 <span class="quiet-pill">Local time</span>
               </div>
 
+              <div class="timeline-export">
+                <button id="download-schedule-button" class="copy-button" type="button" disabled>
+                  <span aria-hidden="true">↓</span>Download Truck Schedule
+                </button>
+              </div>
+              <p id="download-status" class="copy-status" role="status" aria-live="polite"></p>
+
               <div class="legend" aria-label="Timeline legend">
                 <span class="legend-item"><span class="legend-swatch outbound"></span>Travel out</span>
                 <span class="legend-item"><span class="legend-swatch unloading"></span>Unloading</span>
@@ -1156,7 +1169,7 @@
           </section>
         </div>
       </main>
-      <p class="footer-note">Stage 6 · Concrete cost estimate</p>
+      <p class="footer-note">Stage 7 · Download truck schedule</p>
     </div>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
       integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
@@ -1372,6 +1385,8 @@
         const orderSpacingText = document.getElementById("order-spacing-text");
         const copyOrderButton = document.getElementById("copy-order-button");
         const copyStatus = document.getElementById("copy-status");
+        const downloadScheduleButton = document.getElementById("download-schedule-button");
+        const downloadStatus = document.getElementById("download-status");
 
         function setStatus(element, message, isError) {
           element.textContent = message;
@@ -1413,6 +1428,7 @@
         let pointsBeforeDrawing = [];
         let geometryMode = "drawn";
         let currentOrderText = "";
+        let currentScheduleCsv = "";
 
         function formatArea(squareFeet) {
           return Math.round(squareFeet).toLocaleString("en-US");
@@ -1458,6 +1474,13 @@
           return clockTime + daySuffix;
         }
 
+        function escapeCsvField(value) {
+          const text = String(value);
+          return /[",\r\n]/.test(text)
+            ? "\"" + text.replace(/"/g, "\"\"") + "\""
+            : text;
+        }
+
         function chooseAxisInterval(spanMinutes) {
           const intervals = [5, 10, 15, 20, 30, 60, 90, 120, 180, 240, 360, 480, 720, 1440, 2880];
           return intervals.find((interval) => spanMinutes / interval <= 8) ||
@@ -1479,6 +1502,10 @@
           copyOrderButton.disabled = true;
           copyStatus.textContent = "";
           copyStatus.classList.remove("error", "success");
+          currentScheduleCsv = "";
+          downloadScheduleButton.disabled = true;
+          downloadStatus.textContent = "";
+          downloadStatus.classList.remove("error", "success");
         }
 
         function appendTimelineSegment(track, type, label, start, end, axisStart, spanMinutes) {
@@ -1530,6 +1557,16 @@
           }
 
           const rowsFragment = document.createDocumentFragment();
+          const csvRows = [[
+            "Load number",
+            "Assigned truck",
+            "Arrival time",
+            "Unloading start",
+            "Unloading end",
+            "Return start",
+            "Return end",
+            "Washout/reload completion time"
+          ]];
           for (let index = 0; index < schedule.truckloadCount; index += 1) {
             const arrivalMinutes = firstArrivalMinutes +
               index * schedule.fullUnloadMinutes;
@@ -1543,6 +1580,16 @@
             const returnEnd = unloadEnd + schedule.travelMinutes;
             const washoutEnd = returnEnd + schedule.washoutMinutes;
             const truckNumber = index % schedule.trucksInRotation + 1;
+            csvRows.push([
+              index + 1,
+              truckNumber,
+              formatScheduleTime(arrivalMinutes),
+              formatScheduleTime(arrivalMinutes),
+              formatScheduleTime(unloadEnd),
+              formatScheduleTime(unloadEnd),
+              formatScheduleTime(returnEnd),
+              formatScheduleTime(washoutEnd)
+            ]);
             const row = document.createElement("div");
             const loadLabel = document.createElement("div");
             const loadDetail = document.createElement("span");
@@ -1609,6 +1656,12 @@
             rowsFragment.appendChild(row);
           }
           timelineRows.replaceChildren(rowsFragment);
+          currentScheduleCsv = csvRows
+            .map((row) => row.map(escapeCsvField).join(","))
+            .join("\r\n");
+          downloadScheduleButton.disabled = false;
+          downloadStatus.textContent = "";
+          downloadStatus.classList.remove("error", "success");
           timelineInner.setAttribute(
             "aria-label",
             "Truck schedule from " + formatScheduleTime(axisStart) +
@@ -1658,6 +1711,41 @@
             copyStatus.classList.remove("success");
             copyStatus.classList.add("error");
             console.error("Could not copy the order summary to the clipboard.", error);
+          }
+        }
+
+        function downloadTruckSchedule() {
+          if (!currentScheduleCsv || downloadScheduleButton.disabled) {
+            return;
+          }
+
+          let downloadUrl = "";
+          try {
+            const csvBlob = new Blob(
+              ["\uFEFF", currentScheduleCsv],
+              { type: "text/csv;charset=utf-8" }
+            );
+            downloadUrl = URL.createObjectURL(csvBlob);
+            const downloadLink = document.createElement("a");
+            downloadLink.href = downloadUrl;
+            downloadLink.download = "truck-schedule.csv";
+            downloadLink.hidden = true;
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            downloadLink.remove();
+            window.setTimeout(() => URL.revokeObjectURL(downloadUrl), 0);
+            downloadStatus.textContent = "Truck schedule CSV download started.";
+            downloadStatus.classList.remove("error");
+            downloadStatus.classList.add("success");
+          } catch (error) {
+            const message = error instanceof Error
+              ? error.message
+              : "The browser could not create the CSV file.";
+            downloadStatus.textContent =
+              "Could not download the truck schedule. " + message;
+            downloadStatus.classList.remove("success");
+            downloadStatus.classList.add("error");
+            console.error("Could not download the truck schedule CSV.", error);
           }
         }
 
@@ -2182,6 +2270,7 @@
         drawButton.addEventListener("click", startDrawing);
         cancelButton.addEventListener("click", cancelDrawing);
         copyOrderButton.addEventListener("click", copyOrderSummary);
+        downloadScheduleButton.addEventListener("click", downloadTruckSchedule);
         mapMode.addEventListener("change", updateMode);
         typedMode.addEventListener("change", updateMode);
         lengthInput.addEventListener("input", drawTypedRectangle);
