@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#f3f6f7">
     <title>Concrete Pour Planner</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
     <style>
       :root {
         color-scheme: light;
@@ -196,192 +198,76 @@
         white-space: nowrap;
       }
 
-      .map-preview {
-        position: relative;
-        min-height: 300px;
-        overflow: hidden;
+      #map {
+        height: 300px;
         border: 1px solid #d8e1de;
         border-radius: 12px;
-        background:
-          radial-gradient(ellipse at 18% 24%, rgba(181, 190, 145, 0.78) 0 9%, transparent 10%),
-          radial-gradient(ellipse at 76% 75%, rgba(167, 177, 133, 0.68) 0 14%, transparent 15%),
-          radial-gradient(ellipse at 73% 20%, rgba(199, 193, 157, 0.56) 0 11%, transparent 12%),
-          linear-gradient(135deg, #aab69d 0%, #c2c0a2 25%, #aab7a3 47%, #c4c5a9 72%, #a6b39e 100%);
       }
 
-      .map-preview::before,
-      .map-preview::after {
-        position: absolute;
-        content: "";
-        pointer-events: none;
+      .leaflet-container {
+        border-radius: 11px;
+        font: inherit;
       }
 
-      .map-preview::before {
-        top: 43%;
-        left: -8%;
-        width: 120%;
-        height: 20px;
-        transform: rotate(-16deg);
-        border: 5px solid rgba(238, 235, 213, 0.85);
-        border-right: 0;
-        border-left: 0;
-        background: rgba(159, 166, 147, 0.5);
+      .leaflet-crosshair {
+        cursor: crosshair;
       }
 
-      .map-preview::after {
-        top: -12%;
-        left: 67%;
-        width: 18px;
-        height: 125%;
-        transform: rotate(25deg);
-        border: 4px solid rgba(239, 236, 215, 0.8);
-        border-top: 0;
-        border-bottom: 0;
-        background: rgba(159, 166, 147, 0.42);
+      .leaflet-control-attribution {
+        font-size: 9px;
       }
 
-      .map-grid {
-        position: absolute;
-        inset: 0;
-        background-image:
-          linear-gradient(rgba(255, 255, 255, 0.11) 1px, transparent 1px),
-          linear-gradient(90deg, rgba(255, 255, 255, 0.11) 1px, transparent 1px);
-        background-size: 38px 38px;
-        pointer-events: none;
+      .corner-handle {
+        border: 0;
+        background: transparent;
       }
 
-      .map-topline {
-        position: absolute;
-        z-index: 1;
-        top: 12px;
-        left: 12px;
-        display: flex;
-        align-items: center;
-        gap: 7px;
-        padding: 7px 10px;
-        border: 1px solid rgba(255, 255, 255, 0.72);
-        border-radius: 8px;
-        background: rgba(255, 255, 255, 0.92);
-        color: #3e5653;
-        font-size: 11px;
-        font-weight: 650;
-        box-shadow: 0 2px 8px rgba(30, 48, 40, 0.08);
-      }
-
-      .map-pin {
-        width: 8px;
-        height: 8px;
+      .corner-handle span {
+        display: block;
+        width: 14px;
+        height: 14px;
+        border: 2px solid #fff;
         border-radius: 50%;
         background: var(--accent);
-        box-shadow: 0 0 0 3px rgba(12, 119, 116, 0.15);
+        box-shadow: 0 1px 5px rgba(16, 49, 48, 0.45);
       }
 
-      .map-toolbar {
+      .map-frame {
+        position: relative;
+      }
+
+      .map-output-label {
         position: absolute;
-        z-index: 1;
+        z-index: 800;
         top: 12px;
         right: 12px;
-        display: grid;
-        overflow: hidden;
-        border: 1px solid rgba(255, 255, 255, 0.75);
-        border-radius: 8px;
-        background: rgba(255, 255, 255, 0.94);
-        box-shadow: 0 2px 8px rgba(30, 48, 40, 0.08);
-      }
-
-      .map-toolbar span {
-        display: grid;
-        width: 32px;
-        height: 31px;
-        place-items: center;
-        color: #38514d;
-        font-size: 16px;
-        font-weight: 650;
-      }
-
-      .map-toolbar span + span {
-        border-top: 1px solid #e5e9e5;
-      }
-
-      .road-label {
-        position: absolute;
-        z-index: 1;
-        color: rgba(54, 68, 56, 0.74);
-        font-size: 9px;
-        font-weight: 700;
-        letter-spacing: 0.09em;
-        text-transform: uppercase;
-      }
-
-      .road-label.one {
-        top: 27%;
-        left: 14%;
-        transform: rotate(-16deg);
-      }
-
-      .road-label.two {
-        right: 15%;
-        bottom: 23%;
-        transform: rotate(25deg);
-      }
-
-      .slab-shape {
-        position: absolute;
-        z-index: 2;
-        top: 43%;
-        left: 41%;
-        display: grid;
-        width: 135px;
-        height: 82px;
-        transform: translate(-50%, -50%) rotate(-12deg);
-        place-content: center;
-        border: 2px solid #fff;
-        border-radius: 4px;
-        background: rgba(12, 119, 116, 0.78);
-        color: #fff;
-        text-align: center;
-        box-shadow: 0 3px 10px rgba(17, 58, 54, 0.24);
-      }
-
-      .slab-shape strong {
-        font-size: 12px;
-        line-height: 1.3;
-      }
-
-      .slab-shape span {
-        margin-top: 3px;
-        font-size: 10px;
-      }
-
-      .map-label {
-        position: absolute;
-        z-index: 3;
-        top: calc(43% + 50px);
-        left: 41%;
-        transform: translateX(-50%);
-        padding: 6px 9px;
+        max-width: calc(100% - 70px);
+        padding: 7px 9px;
+        border: 1px solid #dce9e6;
         border-radius: 7px;
-        background: #fff;
+        background: rgba(255, 255, 255, 0.96);
         color: var(--ink);
-        font-size: 10px;
-        font-weight: 700;
-        white-space: nowrap;
+        font: 650 10px/1.45 system-ui, sans-serif;
         box-shadow: 0 2px 9px rgba(30, 48, 40, 0.15);
+        pointer-events: none;
       }
 
-      .map-footer {
-        position: absolute;
-        right: 10px;
-        bottom: 9px;
-        left: 10px;
+      .map-controls {
         display: flex;
         align-items: center;
         justify-content: space-between;
         gap: 10px;
-        color: rgba(37, 57, 48, 0.82);
+        margin: 0 0 10px;
+      }
+
+      .map-controls-status {
+        color: var(--muted);
         font-size: 10px;
-        font-weight: 650;
-        text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
+      }
+
+      .map-controls-actions {
+        display: flex;
+        gap: 7px;
       }
 
       .map-note {
@@ -408,15 +294,40 @@
       }
 
       .draw-button {
-        position: absolute;
-        z-index: 4;
-        right: 12px;
-        bottom: 41px;
+        min-height: 34px;
+      }
+
+      .draw-button:disabled {
+        opacity: 0.48;
+      }
+
+      .draw-button.active {
+        border-color: var(--accent-dark);
+        background: var(--accent-dark);
+      }
+
+      .cancel-button {
+        min-height: 34px;
+        padding: 0 10px;
+        border: 1px solid #d8e1e2;
+        border-radius: 9px;
+        background: #fff;
+        color: #50666a;
+        font-size: 11px;
+        font-weight: 650;
       }
 
       .draw-button span {
         font-size: 16px;
         line-height: 1;
+      }
+
+      .map-note.error {
+        color: #a43535;
+      }
+
+      .map-note.success {
+        color: var(--accent-dark);
       }
 
       .hint {
@@ -538,8 +449,19 @@
         font-weight: 650;
       }
 
-      .input-wrap input[readonly] {
+      .input-wrap input:disabled {
+        background: #f1f4f4;
+        color: #78888b;
         cursor: default;
+      }
+
+      .input-wrap input:focus-visible {
+        border-color: var(--accent);
+        outline: 3px solid rgba(12, 119, 116, 0.13);
+      }
+
+      .map-controls-status.error {
+        color: #a43535;
       }
 
       .unit {
@@ -557,6 +479,10 @@
         color: #879599;
         font-size: 9px;
         line-height: 1.35;
+      }
+
+      .field-help.error {
+        color: #a43535;
       }
 
       .mode-help {
@@ -864,8 +790,8 @@
           gap: 16px;
         }
 
-        .map-preview {
-          min-height: 270px;
+        #map {
+          height: 270px;
         }
 
         .summary-grid {
@@ -926,12 +852,12 @@
             <p>Slab quantities and truck scheduling</p>
           </div>
         </div>
-        <div class="stage-badge"><span class="stage-dot"></span>Stage 1 mockup</div>
+        <div class="stage-badge"><span class="stage-dot"></span>Stage 2 · Map and geometry</div>
       </header>
 
       <p class="prototype-note">
-        Static layout preview. Values are illustrative placeholders; controls,
-        map drawing, and copy are not connected, and no calculations run.
+        Map drawing and typed dimensions are interactive. Calculated results
+        remain illustrative placeholders, and the Copy button is not connected.
       </p>
 
       <main class="workspace">
@@ -947,29 +873,26 @@
                 <span class="quiet-pill">Zoom 18</span>
               </div>
 
-              <div class="map-preview" role="img" aria-label="Mock map preview with a 40 by 60 foot slab outline">
-                <div class="map-grid"></div>
-                <div class="map-topline"><span class="map-pin"></span>BYU campus</div>
-                <div class="map-toolbar" aria-hidden="true">
-                  <span>+</span><span>-</span>
-                </div>
-                <span class="road-label one">Campus Drive</span>
-                <span class="road-label two">University Parkway</span>
-                <div class="slab-shape">
-                  <strong>40 x 60 ft slab</strong>
-                  <span>Example outline</span>
-                </div>
-                <div class="map-label">2,400 ft<sup>2</sup> · 47.0 cy to order</div>
-                <button class="draw-button" type="button"><span aria-hidden="true">+</span>Draw slab</button>
-                <div class="map-footer">
-                  <span>Illustrative map preview</span>
-                  <span>Imagery attribution appears with the live map</span>
+              <div class="map-controls">
+                <span id="map-mode-status" class="map-controls-status" aria-live="polite">Example outline loaded</span>
+                <div class="map-controls-actions">
+                  <button id="cancel-draw" class="cancel-button" type="button" hidden>Cancel</button>
+                  <button id="draw-button" class="draw-button" type="button"><span aria-hidden="true">+</span>Draw slab</button>
                 </div>
               </div>
-              <p class="map-note">Example slab is centered on the map. Draw at least three corners to outline a slab.</p>
+              <div class="map-frame">
+                <div id="map" role="application" aria-label="Satellite map centered on BYU campus"></div>
+                <div class="map-output-label">Static sample result · 2,400 ft<sup>2</sup> · 47.0 cy to order</div>
+              </div>
+              <p id="map-status" class="map-note" role="status" aria-live="polite">
+                Click Draw slab, add at least three corners, then double-click or click the first corner to finish.
+              </p>
+              <p class="map-note">
+                Static result preview: 2,400 ft<sup>2</sup> and 47.0 cy to order. Results do not change in Stage 2.
+              </p>
               <div class="hint">
                 <span class="hint-mark" aria-hidden="true">i</span>
-                <span>Start with the map outline, or enter rectangular dimensions in the inputs.</span>
+                <span>Start with the map outline, or switch to typed dimensions and enter a length and width.</span>
               </div>
             </div>
           </section>
@@ -989,11 +912,11 @@
                 <legend>Slab outline</legend>
                 <div class="mode-options">
                   <label class="mode-option selected">
-                    <input type="radio" name="slab-mode" checked>
+                    <input id="map-mode" type="radio" name="slab-mode" value="map" checked>
                     Draw on map
                   </label>
                   <label class="mode-option">
-                    <input type="radio" name="slab-mode">
+                    <input id="typed-mode" type="radio" name="slab-mode" value="typed">
                     Type dimensions
                   </label>
                 </div>
@@ -1001,20 +924,23 @@
                   <div class="field">
                     <label for="length">Length</label>
                     <div class="input-wrap">
-                      <input id="length" type="number" value="40" min="1" max="1000" step="0.1" readonly>
+                      <input id="length" type="number" min="1" max="1000" step="0.1" placeholder="40" required disabled>
                       <span class="unit">ft</span>
                     </div>
-                    <p class="field-help">1-1,000 ft · 0.1 ft steps · sample only</p>
+                    <p class="field-help">1-1,000 ft · 0.1 ft steps · no default</p>
                   </div>
                   <div class="field">
                     <label for="width">Width</label>
                     <div class="input-wrap">
-                      <input id="width" type="number" value="60" min="1" max="1000" step="0.1" readonly>
+                      <input id="width" type="number" min="1" max="1000" step="0.1" placeholder="60" required disabled>
                       <span class="unit">ft</span>
                     </div>
-                    <p class="field-help">1-1,000 ft · 0.1 ft steps · sample only</p>
+                    <p class="field-help">1-1,000 ft · 0.1 ft steps · no default</p>
                   </div>
                 </div>
+                <p id="dimension-status" class="field-help" role="status" aria-live="polite">
+                  Select typed dimensions, then enter both values to draw a rectangle at the map center.
+                </p>
                 <p class="mode-help">Typed dimensions have no defaults and are required when that mode is selected.</p>
               </fieldset>
 
@@ -1025,7 +951,7 @@
                 <div class="field">
                   <label for="thickness">Slab thickness</label>
                   <div class="input-wrap">
-                    <input id="thickness" type="number" value="6" min="1" max="36" step="0.25" readonly>
+                    <input id="thickness" type="number" value="6" min="1" max="36" step="0.25" required>
                     <span class="unit">in</span>
                   </div>
                   <p class="field-help">1-36 in · default 6</p>
@@ -1033,7 +959,7 @@
                 <div class="field">
                   <label for="waste">Waste allowance</label>
                   <div class="input-wrap">
-                    <input id="waste" type="number" value="5" min="0" max="25" step="1" readonly>
+                    <input id="waste" type="number" value="5" min="0" max="25" step="1" required>
                     <span class="unit">%</span>
                   </div>
                   <p class="field-help">0-25% · default 5</p>
@@ -1041,7 +967,7 @@
                 <div class="field">
                   <label for="capacity">Truck capacity</label>
                   <div class="input-wrap">
-                    <input id="capacity" type="number" value="10" min="1" max="20" step="0.5" readonly>
+                    <input id="capacity" type="number" value="10" min="1" max="20" step="0.5" required>
                     <span class="unit">cy</span>
                   </div>
                   <p class="field-help">1-20 cy · default 10</p>
@@ -1049,7 +975,7 @@
                 <div class="field">
                   <label for="travel">One-way travel</label>
                   <div class="input-wrap">
-                    <input id="travel" type="number" value="20" min="0" max="240" step="1" readonly>
+                    <input id="travel" type="number" value="20" min="0" max="240" step="1" required>
                     <span class="unit">min</span>
                   </div>
                   <p class="field-help">0-240 min · default 20</p>
@@ -1057,7 +983,7 @@
                 <div class="field">
                   <label for="placement">Placement rate</label>
                   <div class="input-wrap">
-                    <input id="placement" type="number" value="30" min="1" max="120" step="1" readonly>
+                    <input id="placement" type="number" value="30" min="1" max="120" step="1" required>
                     <span class="unit">cy/hr</span>
                   </div>
                   <p class="field-help">1-120 cy/hr · default 30</p>
@@ -1065,7 +991,7 @@
                 <div class="field">
                   <label for="washout">Washout and reload</label>
                   <div class="input-wrap">
-                    <input id="washout" type="number" value="10" min="1" max="120" step="1" readonly>
+                    <input id="washout" type="number" value="10" min="1" max="120" step="1" required>
                     <span class="unit">min</span>
                   </div>
                   <p class="field-help">1-120 min · default 10</p>
@@ -1073,7 +999,7 @@
                 <div class="field">
                   <label for="arrival">First truck arrival</label>
                   <div class="input-wrap">
-                    <input id="arrival" type="time" value="07:00" readonly>
+                    <input id="arrival" type="time" value="07:00" min="00:00" max="23:59" step="60" required>
                     <span class="unit">local</span>
                   </div>
                   <p class="field-help">Local time · minute precision</p>
@@ -1222,7 +1148,428 @@
           </section>
         </div>
       </main>
-      <p class="footer-note">Stage 1 page-layout mockup · Results and controls are static examples</p>
+      <p class="footer-note">Stage 2 · Map and slab geometry · Calculated results remain placeholders</p>
     </div>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script>
+      (() => {
+        const LAT_MIN = -85.05;
+        const LAT_MAX = 85.05;
+        const LON_MIN = -180;
+        const LON_MAX = 180;
+        const defaultCenter = [40.2518, -111.6493];
+        const mapStatus = document.getElementById("map-status");
+        const modeStatus = document.getElementById("map-mode-status");
+        const dimensionStatus = document.getElementById("dimension-status");
+        const mapMode = document.getElementById("map-mode");
+        const typedMode = document.getElementById("typed-mode");
+        const lengthInput = document.getElementById("length");
+        const widthInput = document.getElementById("width");
+        const drawButton = document.getElementById("draw-button");
+        const cancelButton = document.getElementById("cancel-draw");
+
+        function setStatus(element, message, isError) {
+          element.textContent = message;
+          element.classList.toggle("error", Boolean(isError));
+          element.classList.toggle("success", !isError);
+        }
+
+        if (typeof L === "undefined") {
+          setStatus(mapStatus, "The map library did not load. Check your internet connection and reload.", true);
+          console.error("Leaflet 1.9.4 failed to load from unpkg.");
+          return;
+        }
+
+        const map = L.map("map", {
+          center: defaultCenter,
+          zoom: 18,
+          minZoom: 2,
+          maxZoom: 19,
+          doubleClickZoom: false,
+          maxBounds: L.latLngBounds([[LAT_MIN, LON_MIN], [LAT_MAX, LON_MAX]]),
+          maxBoundsViscosity: 1
+        });
+
+        const tiles = L.tileLayer(
+          "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+          {
+            maxZoom: 19,
+            attribution: "Tiles &copy; Esri — Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community"
+          }
+        ).addTo(map);
+
+        let slabPolygon = null;
+        let cornerMarkers = [];
+        let currentPoints = [];
+        let drawingPoints = [];
+        let previewLine = null;
+        let previewMarkers = [];
+        let drawing = false;
+        let pointsBeforeDrawing = [];
+
+        tiles.on("tileerror", () => {
+          setStatus(mapStatus, "Some satellite tiles could not be loaded. Check your connection.", true);
+        });
+
+        function pointInBounds(point) {
+          return point.lat >= LAT_MIN && point.lat <= LAT_MAX &&
+            point.lng >= LON_MIN && point.lng <= LON_MAX;
+        }
+
+        function cross(a, b, c) {
+          return (b.lng - a.lng) * (c.lat - a.lat) -
+            (b.lat - a.lat) * (c.lng - a.lng);
+        }
+
+        function onSegment(a, b, point) {
+          return point.lng >= Math.min(a.lng, b.lng) - 1e-12 &&
+            point.lng <= Math.max(a.lng, b.lng) + 1e-12 &&
+            point.lat >= Math.min(a.lat, b.lat) - 1e-12 &&
+            point.lat <= Math.max(a.lat, b.lat) + 1e-12;
+        }
+
+        function segmentsIntersect(a, b, c, d) {
+          const abC = cross(a, b, c);
+          const abD = cross(a, b, d);
+          const cdA = cross(c, d, a);
+          const cdB = cross(c, d, b);
+          const epsilon = 1e-12;
+
+          if (((abC > epsilon && abD < -epsilon) || (abC < -epsilon && abD > epsilon)) &&
+              ((cdA > epsilon && cdB < -epsilon) || (cdA < -epsilon && cdB > epsilon))) {
+            return true;
+          }
+          return (Math.abs(abC) <= epsilon && onSegment(a, b, c)) ||
+            (Math.abs(abD) <= epsilon && onSegment(a, b, d)) ||
+            (Math.abs(cdA) <= epsilon && onSegment(c, d, a)) ||
+            (Math.abs(cdB) <= epsilon && onSegment(c, d, b));
+        }
+
+        function isValidOutline(points) {
+          if (points.length < 3 || points.some((point) => !pointInBounds(point))) {
+            return false;
+          }
+
+          for (let i = 0; i < points.length; i += 1) {
+            for (let j = i + 1; j < points.length; j += 1) {
+              if (map.distance(points[i], points[j]) < 0.1) {
+                return false;
+              }
+            }
+          }
+
+          let twiceArea = 0;
+          for (let i = 0; i < points.length; i += 1) {
+            const next = points[(i + 1) % points.length];
+            twiceArea += points[i].lng * next.lat - next.lng * points[i].lat;
+          }
+          if (Math.abs(twiceArea) < 1e-12) {
+            return false;
+          }
+
+          for (let i = 0; i < points.length; i += 1) {
+            const a = points[i];
+            const b = points[(i + 1) % points.length];
+            for (let j = i + 1; j < points.length; j += 1) {
+              if (j === i || j === (i + 1) % points.length ||
+                  (j + 1) % points.length === i) {
+                continue;
+              }
+              const c = points[j];
+              const d = points[(j + 1) % points.length];
+              if (segmentsIntersect(a, b, c, d)) {
+                return false;
+              }
+            }
+          }
+          return true;
+        }
+
+        function clearSlabLayers() {
+          if (slabPolygon) {
+            map.removeLayer(slabPolygon);
+            slabPolygon = null;
+          }
+          cornerMarkers.forEach((marker) => map.removeLayer(marker));
+          cornerMarkers = [];
+        }
+
+        function clearPreview() {
+          if (previewLine) {
+            map.removeLayer(previewLine);
+            previewLine = null;
+          }
+          previewMarkers.forEach((marker) => map.removeLayer(marker));
+          previewMarkers = [];
+        }
+
+        function renderSlab(points, message) {
+          clearSlabLayers();
+          currentPoints = points.map((point) => L.latLng(point.lat, point.lng));
+          slabPolygon = L.polygon(currentPoints, {
+            color: "#0c7774",
+            weight: 3,
+            opacity: 0.95,
+            fillColor: "#0c7774",
+            fillOpacity: 0.22
+          }).addTo(map);
+          let dragStartPoints = [];
+          currentPoints.forEach((point, index) => {
+            const marker = L.marker(point, {
+              draggable: true,
+              icon: L.divIcon({
+                className: "corner-handle",
+                html: "<span></span>",
+                iconSize: [18, 18],
+                iconAnchor: [9, 9]
+              }),
+              title: "Drag to edit slab corner"
+            }).addTo(map);
+
+            marker.on("dragstart", () => {
+              dragStartPoints = cornerMarkers.map((corner) =>
+                L.latLng(corner.getLatLng().lat, corner.getLatLng().lng)
+              );
+            });
+            marker.on("drag", (event) => {
+              const pointNow = event.target.getLatLng();
+              const bounded = L.latLng(
+                Math.max(LAT_MIN, Math.min(LAT_MAX, pointNow.lat)),
+                Math.max(LON_MIN, Math.min(LON_MAX, pointNow.lng))
+              );
+              if (bounded.lat !== pointNow.lat || bounded.lng !== pointNow.lng) {
+                event.target.setLatLng(bounded);
+              }
+            });
+            marker.on("dragend", () => {
+              const changedPoints = cornerMarkers.map((corner) => corner.getLatLng());
+              if (!isValidOutline(changedPoints)) {
+                cornerMarkers.forEach((corner, cornerIndex) => {
+                  corner.setLatLng(dragStartPoints[cornerIndex]);
+                });
+                slabPolygon.setLatLngs(dragStartPoints);
+                setStatus(mapStatus, "That move would make the outline invalid; the corner was restored.", true);
+                return;
+              }
+              currentPoints = changedPoints.map((changedPoint) =>
+                L.latLng(changedPoint.lat, changedPoint.lng)
+              );
+              slabPolygon.setLatLngs(currentPoints);
+              setStatus(mapStatus, "Corner moved. Calculated results remain static placeholders in Stage 2.", false);
+            });
+            cornerMarkers.push(marker);
+          });
+          setStatus(mapStatus, message, false);
+        }
+
+        function rectanglePoints(lengthFeet, widthFeet, center) {
+          const metersPerDegreeLat = 111320;
+          const metersPerDegreeLon = metersPerDegreeLat *
+            Math.cos(center.lat * Math.PI / 180);
+          const halfLengthDegrees = lengthFeet * 0.3048 / (2 * metersPerDegreeLat);
+          const halfWidthDegrees = widthFeet * 0.3048 / (2 * metersPerDegreeLon);
+
+          return [
+            L.latLng(center.lat - halfLengthDegrees, center.lng - halfWidthDegrees),
+            L.latLng(center.lat + halfLengthDegrees, center.lng - halfWidthDegrees),
+            L.latLng(center.lat + halfLengthDegrees, center.lng + halfWidthDegrees),
+            L.latLng(center.lat - halfLengthDegrees, center.lng + halfWidthDegrees)
+          ];
+        }
+
+        function drawTypedRectangle() {
+          if (!lengthInput.value || !widthInput.value) {
+            clearSlabLayers();
+            currentPoints = [];
+            setStatus(dimensionStatus, "Enter both length and width to draw the rectangle.", false);
+            return;
+          }
+
+          if (!lengthInput.checkValidity() || !widthInput.checkValidity()) {
+            clearSlabLayers();
+            currentPoints = [];
+            setStatus(dimensionStatus, "Use dimensions from 1 to 1,000 ft in 0.1 ft steps.", true);
+            return;
+          }
+
+          const points = rectanglePoints(
+            Number(lengthInput.value),
+            Number(widthInput.value),
+            map.getCenter()
+          );
+          if (!isValidOutline(points)) {
+            clearSlabLayers();
+            currentPoints = [];
+            setStatus(dimensionStatus, "This rectangle would extend beyond the supported map limits.", true);
+            return;
+          }
+
+          renderSlab(points, "Typed rectangle drawn at the map center. Results remain static placeholders.");
+          setStatus(dimensionStatus, "Rectangle shown at the map center; calculated results remain static.", false);
+        }
+
+        function updateMode() {
+          const isTyped = typedMode.checked;
+          lengthInput.disabled = !isTyped;
+          widthInput.disabled = !isTyped;
+          drawButton.disabled = isTyped;
+          document.querySelectorAll(".mode-option").forEach((option) => {
+            option.classList.toggle("selected", option.querySelector("input").checked);
+          });
+
+          if (drawing && isTyped) {
+            cancelDrawing();
+          }
+          if (isTyped) {
+            clearSlabLayers();
+            currentPoints = [];
+            setStatus(modeStatus, "Type dimensions selected", false);
+            drawTypedRectangle();
+          } else {
+            setStatus(modeStatus, "Map drawing selected", false);
+            setStatus(dimensionStatus, "Typed dimensions have no defaults and are required in typed mode.", false);
+            setStatus(mapStatus, "Drag a corner to edit the outline, or draw a new slab.", false);
+          }
+        }
+
+        function removePreview() {
+          clearPreview();
+        }
+
+        function startDrawing() {
+          pointsBeforeDrawing = currentPoints.map((point) =>
+            L.latLng(point.lat, point.lng)
+          );
+          clearSlabLayers();
+          drawingPoints = [];
+          drawing = true;
+          map.getContainer().classList.add("leaflet-crosshair");
+          drawButton.disabled = true;
+          drawButton.classList.add("active");
+          cancelButton.hidden = false;
+          setStatus(modeStatus, "Drawing outline", false);
+          setStatus(mapStatus, "Click at least three corners. Double-click or click the first corner to finish.", false);
+        }
+
+        function restoreDrawControls() {
+          drawing = false;
+          drawingPoints = [];
+          map.getContainer().classList.remove("leaflet-crosshair");
+          drawButton.disabled = typedMode.checked;
+          drawButton.classList.remove("active");
+          cancelButton.hidden = true;
+        }
+
+        function cancelDrawing() {
+          if (!drawing) {
+            return;
+          }
+          removePreview();
+          restoreDrawControls();
+          if (pointsBeforeDrawing.length >= 3) {
+            renderSlab(pointsBeforeDrawing, "Previous outline restored.");
+          } else {
+            currentPoints = [];
+            setStatus(mapStatus, "Drawing cancelled.", false);
+          }
+          setStatus(modeStatus, "Map drawing selected", false);
+        }
+
+        function finishDrawing() {
+          if (!drawing) {
+            return;
+          }
+          if (!isValidOutline(drawingPoints)) {
+            setStatus(mapStatus, "Outline must have at least three distinct corners and cannot cross itself or exceed map limits.", true);
+            return;
+          }
+          const completedPoints = drawingPoints.map((point) =>
+            L.latLng(point.lat, point.lng)
+          );
+          removePreview();
+          restoreDrawControls();
+          renderSlab(completedPoints, "Outline complete. Drag a corner to edit it; results remain static placeholders.");
+          setStatus(modeStatus, "Map drawing selected", false);
+        }
+
+        function closeToFirstPoint(point) {
+          if (drawingPoints.length < 3) {
+            return false;
+          }
+          const firstPixel = map.latLngToContainerPoint(drawingPoints[0]);
+          const clickedPixel = map.latLngToContainerPoint(point);
+          return firstPixel.distanceTo(clickedPixel) <= 12;
+        }
+
+        function addDrawingPoint(point) {
+          if (!pointInBounds(point)) {
+            setStatus(mapStatus, "Corners must stay within latitude -85.05 to 85.05 degrees and longitude -180 to 180 degrees.", true);
+            return;
+          }
+          if (closeToFirstPoint(point)) {
+            finishDrawing();
+            return;
+          }
+          const lastPoint = drawingPoints[drawingPoints.length - 1];
+          if (lastPoint && map.distance(lastPoint, point) < 0.1) {
+            return;
+          }
+
+          drawingPoints.push(L.latLng(point.lat, point.lng));
+          previewMarkers.push(L.circleMarker(point, {
+            radius: 5,
+            color: "#fff",
+            weight: 2,
+            fillColor: "#0c7774",
+            fillOpacity: 1,
+            interactive: false
+          }).addTo(map));
+          if (previewLine) {
+            map.removeLayer(previewLine);
+          }
+          previewLine = L.polyline(drawingPoints, {
+            color: "#0c7774",
+            weight: 2,
+            dashArray: "6 5",
+            interactive: false
+          }).addTo(map);
+          setStatus(mapStatus, drawingPoints.length + " corner(s) added. Add another corner, or finish the outline.", false);
+        }
+
+        map.on("click", (event) => {
+          if (drawing) {
+            addDrawingPoint(event.latlng);
+          }
+        });
+        map.on("dblclick", (event) => {
+          if (drawing) {
+            event.originalEvent.preventDefault();
+            finishDrawing();
+          }
+        });
+
+        drawButton.addEventListener("click", startDrawing);
+        cancelButton.addEventListener("click", cancelDrawing);
+        mapMode.addEventListener("change", updateMode);
+        typedMode.addEventListener("change", updateMode);
+        lengthInput.addEventListener("input", drawTypedRectangle);
+        widthInput.addEventListener("input", drawTypedRectangle);
+
+        document.querySelectorAll(".field input").forEach((input) => {
+          input.addEventListener("change", () => {
+            if (!input.checkValidity()) {
+              input.reportValidity();
+            }
+          });
+        });
+
+        renderSlab(
+          rectanglePoints(40, 60, map.getCenter()),
+          "Default 40 ft x 60 ft example loaded near BYU campus."
+        );
+        map.whenReady(() => map.invalidateSize());
+      })();
+    </script>
   </body>
 </html>

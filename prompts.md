@@ -50,3 +50,9 @@
   no calculations or functional map behavior were added.
 - Worked: Yes; rendered and checked desktop and mobile layouts, with no app
   calculations or functional map behavior.
+- Asked: Build Stage 2 with Leaflet, imagery tiles, editable outlines, and
+  typed rectangles while keeping results as placeholders.
+- Changed: Replaced the mock map with Leaflet and added map drawing, draggable
+  corners, typed dimensions, and range checks in `index.html`.
+- Worked: Yes; verified tile attribution, drawing, editing, typed rectangle
+  input, range rejection, and the responsive layout in a browser.
