@@ -7,5 +7,5 @@
   `index.html`.
 - Worked: Yes; the requested structure is in place.
 - Asked: Commit these changes.
-- Changed: Preparing the project setup files for a Git commit.
-- Worked: Pending commit.
+- Changed: Committed the project setup files.
+- Worked: Yes; the commit was created successfully.
