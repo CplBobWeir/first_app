@@ -96,3 +96,20 @@
 - Asked: Commit the Stage 5 changes.
 - Changed: Committed the Stage 5 validation label and this request log.
 - Worked: Yes; the commit was created successfully.
+- Asked: Update `spec.md` for the agreed Concrete Cost Estimator, preserve the
+  existing requirements, and do not build or modify `index.html`.
+- Changed: Added the USD price input, cost calculation and summary card,
+  clarified out-of-scope fees, added three cost validation cases, and added a
+  focused Build stage.
+- Worked: Yes; existing validation cases were preserved, and the app was not
+  built.
+- Asked: Build only Stage 6 by adding the concrete price input and live cost
+  card, preserve existing behavior, test the three cost cases and original
+  validation cases, and record the request.
+- Changed: Added the $150.00/cy nonnegative price input, calculated cost from
+  rounded order volume, added isolated invalid-price handling and the cost
+  summary card, updated the stage indicator, and kept large cost values within
+  the mobile card layout.
+- Worked: Yes; cost cases 5-7 and original validation cases 1-4 passed.
+  Negative, off-step, and blank prices cleared only the cost result. Mobile
+  layout and section order checks also passed.

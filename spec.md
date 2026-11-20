@@ -34,6 +34,9 @@ planning a slab pour and calling in the order to the batch plant.
 - Slab thickness: number field in inches, range 1-36 in, 0.25 in steps,
   default 6.
 - Waste allowance: number field in percent, range 0-25%, 1% steps, default 5.
+- Concrete price: number field in USD per cubic yard, default $150.00/cy,
+  minimum $0.00, $0.01 steps, and no maximum. The price is required and must
+  be nonnegative and valid to the nearest cent.
 - Truck capacity: number field in cubic yards, range 1-20 cy, 0.5 cy steps,
   default 10.
 - One-way travel time from the batch plant: number field in minutes, range
@@ -58,6 +61,9 @@ planning a slab pour and calling in the order to the batch plant.
 - Volume to order (cubic yards) =
   area x thickness / 12 / 27 x (1 + waste / 100), rounded up to the next
   0.5 cy.
+- Estimated concrete cost (USD) = the rounded volume to order (cy) multiplied
+  by the concrete price ($/cy), formatted to two decimal places. This is a
+  basic concrete material estimate; it does not include taxes or other fees.
 - Truckloads = volume to order / capacity, rounded up. Let N be the number of
   truckloads and q_k the volume in truckload k: q_k = capacity for k < N,
   and q_N = volume to order - capacity x (N - 1). Thus the last load is full
@@ -89,6 +95,10 @@ planning a slab pour and calling in the order to the batch plant.
   pour duration (hours and minutes), and finish time (local clock time).
   Times past midnight continue into the next calendar day and are indicated
   as such.
+- A summary card for estimated concrete cost in USD, calculated from the
+  rounded volume to order and price per cubic yard. The card updates
+  immediately when inputs change. If the price is invalid, clear only the
+  cost estimate while keeping valid pour and schedule results visible.
 - A truck schedule as a timeline (like a Gantt chart): one row per
   truckload showing travel out, unloading, the trip back, and washout,
   in different colors, on a local clock-time axis. Use the segment timings
@@ -130,9 +140,19 @@ planning a slab pour and calling in the order to the batch plant.
 4. Same inputs as case 1, except the first truck arrives at 11:00 PM:
    arrivals are 11:00 PM, 11:20 PM, 11:40 PM, 12:00 AM, and 12:20 AM the
    next day; the pour finishes at 12:34 AM the next day.
+5. Same slab and delivery inputs as case 1 with the default price of
+   $150.00/cy: rounded order volume 47.0 cy and estimated concrete cost
+   $7,050.00.
+6. Same slab and delivery inputs as case 1 with a price of $0.00/cy:
+   estimated concrete cost is $0.00.
+7. Same slab and delivery inputs as case 1 with a negative price or a price
+   not in $0.01 increments: the price is invalid and the cost estimate is
+   cleared, while valid pour and schedule results remain visible.
 
 ## Out of scope
-- Reinforcement, finishing crews, pump trucks, weather, and costs.
+- Taxes, delivery charges, and other fees. The basic concrete material cost
+  estimate is in scope.
+- Reinforcement, finishing crews, pump trucks, and weather.
 - Saving plans.
 
 ## Build stages
@@ -161,3 +181,7 @@ planning a slab pour and calling in the order to the batch plant.
    **Test:** Re-run all validation cases, confirm the required mobile order,
    and check that invalid or out-of-range inputs cannot produce misleading
    results.
+6. **Concrete cost estimate:** Add the USD-per-cubic-yard price input and
+   estimated-cost summary card using the rounded order quantity.
+   **Test:** Confirm validation cases 5-7: $7,050.00 at $150.00/cy, $0.00 at
+   zero price, and invalid prices clearing only the cost estimate.

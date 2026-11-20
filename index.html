@@ -531,6 +531,11 @@
         background: #fff;
       }
 
+      .metric-card.cost .metric-value {
+        font-size: clamp(16px, 1.8vw, 23px);
+        overflow-wrap: anywhere;
+      }
+
       .metric-label {
         display: flex;
         align-items: center;
@@ -882,15 +887,15 @@
           <div class="brand-mark" aria-hidden="true">CP</div>
           <div>
             <h1>Concrete Pour Planner</h1>
-            <p>Slab quantities and truck scheduling</p>
+            <p>Slab quantities, cost, and truck scheduling</p>
           </div>
         </div>
-        <div class="stage-badge"><span class="stage-dot"></span>Stage 5 · Final validation</div>
+        <div class="stage-badge"><span class="stage-dot"></span>Stage 6 · Concrete cost estimate</div>
       </header>
 
       <p class="prototype-note">
-        Slab geometry, pour calculations, truck schedule, and order summary
-        update together whenever the inputs change.
+        Slab geometry, pour calculations, concrete cost, truck schedule, and
+        order summary update together whenever the inputs change.
       </p>
 
       <main class="workspace">
@@ -998,6 +1003,14 @@
                   <p class="field-help">0-25% · default 5</p>
                 </div>
                 <div class="field">
+                  <label for="concrete-price">Concrete price</label>
+                  <div class="input-wrap">
+                    <input id="concrete-price" type="number" value="150.00" min="0" step="0.01" required>
+                    <span class="unit">$/cy</span>
+                  </div>
+                  <p class="field-help">Nonnegative · $0.01 steps · no maximum · default $150.00</p>
+                </div>
+                <div class="field">
                   <label for="capacity">Truck capacity</label>
                   <div class="input-wrap">
                     <input id="capacity" type="number" value="10" min="1" max="20" step="0.5" required>
@@ -1083,6 +1096,11 @@
                   <strong id="summary-finish-value" class="metric-value">8:34 AM</strong>
                   <span id="summary-finish-note" class="metric-sub">First truck at 7:00 AM</span>
                 </article>
+                <article class="metric-card cost">
+                  <div class="metric-label"><span class="metric-icon">$</span>Estimated concrete cost</div>
+                  <strong id="summary-cost-value" class="metric-value">$7,050.00</strong>
+                  <span id="summary-cost-note" class="metric-sub">47.0 cy × $150.00/cy</span>
+                </article>
               </div>
             </div>
           </section>
@@ -1138,7 +1156,7 @@
           </section>
         </div>
       </main>
-      <p class="footer-note">Stage 5 · Final validation and polish</p>
+      <p class="footer-note">Stage 6 · Concrete cost estimate</p>
     </div>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
       integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
@@ -1200,6 +1218,20 @@
           const volumeBeforeRounding =
             areaSquareFeet * thicknessInches / 12 / 27 * (1 + wastePercent / 100);
           return Math.ceil(volumeBeforeRounding * 2 - 1e-10) / 2;
+        }
+
+        function calculateConcreteCost(orderVolume, pricePerCubicYard) {
+          if (!Number.isFinite(orderVolume) || orderVolume < 0) {
+            throw new RangeError("A valid order volume is required to calculate cost.");
+          }
+          if (!Number.isFinite(pricePerCubicYard) || pricePerCubicYard < 0) {
+            throw new RangeError("Concrete price must be a valid nonnegative amount.");
+          }
+          const totalCost = orderVolume * pricePerCubicYard;
+          if (!Number.isFinite(totalCost)) {
+            throw new RangeError("Concrete cost is too large to calculate.");
+          }
+          return totalCost;
         }
 
         function calculateTruckloadCount(orderVolume, truckCapacity) {
@@ -1283,6 +1315,7 @@
           calculateRectangleArea,
           calculateDrawnOutlineArea,
           calculateOrderVolume,
+          calculateConcreteCost,
           calculateTruckloadCount,
           calculateFinalTruckloadVolume,
           calculateFullUnloadIntervalMinutes,
@@ -1319,8 +1352,11 @@
         const summaryDurationValue = document.getElementById("summary-duration-value");
         const summaryFinishValue = document.getElementById("summary-finish-value");
         const summaryFinishNote = document.getElementById("summary-finish-note");
+        const summaryCostValue = document.getElementById("summary-cost-value");
+        const summaryCostNote = document.getElementById("summary-cost-note");
         const thicknessInput = document.getElementById("thickness");
         const wasteInput = document.getElementById("waste");
+        const concretePriceInput = document.getElementById("concrete-price");
         const capacityInput = document.getElementById("capacity");
         const travelInput = document.getElementById("travel");
         const placementInput = document.getElementById("placement");
@@ -1625,6 +1661,40 @@
           }
         }
 
+        const usdFormatter = new Intl.NumberFormat("en-US", {
+          style: "currency",
+          currency: "USD"
+        });
+
+        function clearCostEstimate(message) {
+          summaryCostValue.textContent = "—";
+          summaryCostNote.textContent = message;
+        }
+
+        function updateConcreteCost(orderVolume) {
+          if (!concretePriceInput.value || !concretePriceInput.checkValidity()) {
+            clearCostEstimate("Enter a valid nonnegative price in $0.01 steps");
+            return;
+          }
+
+          const pricePerCubicYard = Number(concretePriceInput.value);
+          try {
+            const totalCost = ConcreteCalculations.calculateConcreteCost(
+              orderVolume,
+              pricePerCubicYard
+            );
+            summaryCostValue.textContent = usdFormatter.format(totalCost);
+            summaryCostNote.textContent =
+              orderVolume.toFixed(1) + " cy × " +
+              usdFormatter.format(pricePerCubicYard) + "/cy";
+          } catch (error) {
+            if (!(error instanceof RangeError)) {
+              throw error;
+            }
+            clearCostEstimate(error.message);
+          }
+        }
+
         function clearCalculatedOutputs(message, isError) {
           mapOutputLabel.textContent = "Calculated results unavailable";
           summaryVolumeValue.textContent = "—";
@@ -1635,6 +1705,7 @@
           summaryDurationValue.textContent = "—";
           summaryFinishValue.textContent = "—";
           summaryFinishNote.textContent = "A valid slab and arrival time are required";
+          clearCostEstimate("A valid order volume is required");
           calculationStatus.textContent = message;
           calculationStatus.classList.toggle("error", Boolean(isError));
           clearScheduleAndOrder(message, isError);
@@ -1710,6 +1781,7 @@
               pourDurationMinutes
             );
             const startParts = arrivalInput.value.split(":").map(Number);
+            updateConcreteCost(orderVolume);
             updateScheduleAndOrder({
               orderVolume,
               truckloadCount,
@@ -2117,6 +2189,7 @@
         [
           thicknessInput,
           wasteInput,
+          concretePriceInput,
           capacityInput,
           travelInput,
           placementInput,
